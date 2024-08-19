@@ -4,10 +4,10 @@ import (
     // "context"
     "os"
     "sync"
-    "github.com/bobthebuilderberlin/kube-advisor-agent/dataproviders"
     "time"
     "fmt"
-    "encoding/json" 
+    "encoding/json"
+    "maps"
     // log "github.com/sirupsen/logrus"
     // corev1 "k8s.io/api/core/v1"
     // metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -84,9 +84,12 @@ var (
 
 func main() {
     startMQTT()
-    apiVersionProvider := dataproviders.NewApiVersionProvider(clientset)
+    dataproviders := getAllDataProviders(clientset)
     for range time.Tick(time.Second * 10) {
-        data := apiVersionProvider.GetData()
+        data := make(map[string]interface{})
+        for _, dataprovider := range dataproviders {
+            maps.Copy(data, dataprovider.GetData())
+        }
         jsonString, _ := json.Marshal(data)
 		fmt.Println(jsonString)
         token := client.Publish("robert/robertstestsensor/message/testmessage", 2, false, jsonString)
