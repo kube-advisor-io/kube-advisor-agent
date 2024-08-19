@@ -12,6 +12,7 @@ import (
 	// corev1 "k8s.io/api/core/v1"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	// "k8s.io/apimachinery/pkg/watch"
+	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
 	"k8s.io/client-go/kubernetes"
 	// "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
@@ -82,22 +83,24 @@ var (
 // }
 
 func main() {
-	startMQTT()
+	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseMQTTFlags())
 	dataproviders := getAllDataProviders(clientset)
+
 	for range time.Tick(time.Second * 10) {
-		data := make(map[string]interface{})
-		for _, dataprovider := range dataproviders {
-			maps.Copy(data, dataprovider.GetData())
-		}
-		jsonString, _ := json.Marshal(data)
-		fmt.Println(jsonString)
-		token := client.Publish("robert/robertstestsensor/message/testmessage", 2, false, jsonString)
-		token.Wait()
-		fmt.Println("Published data")
+		gatherDataAndPublish(dataproviders, mqttClient)
 	}
 	var wg sync.WaitGroup
-	// go watchNamespaces()
-	// go watchPods()
 	wg.Add(1)
 	wg.Wait()
+}
+
+func gatherDataAndPublish(dataproviders []DataProvider, mqttClient *mqtt.MQTTClient) {
+	data := make(map[string]interface{})
+	for _, dataprovider := range dataproviders {
+		maps.Copy(data, dataprovider.GetData())
+	}
+	jsonString, _ := json.Marshal(data)
+	fmt.Println(jsonString)
+	mqttClient.PublishMessage("robert/robertstestsensor/message/testmessage", jsonString)
+	fmt.Println("Published data")
 }

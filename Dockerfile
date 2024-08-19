@@ -13,6 +13,7 @@ RUN go mod download
 # https://docs.docker.com/reference/dockerfile/#copy
 COPY *.go ./
 COPY dataproviders/ dataproviders/
+COPY mqtt/ mqtt/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /kube-advisor-agent
