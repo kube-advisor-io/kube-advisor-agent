@@ -55,7 +55,7 @@ func StartNewMQTTClient(opts *mqtt.ClientOptions, qos int) *MQTTClient {
 		panic(token.Error())
 	}
 	mqttClient.qos = qos
-	fmt.Println("MQTT Client Publisher started %d, QOS %d", mqttClient, qos)
+	fmt.Printf("MQTT Client Publisher started with opts %v, QOS %v\n", *opts, qos)
 	return mqttClient
 }
 
