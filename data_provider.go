@@ -9,8 +9,9 @@ type DataProvider interface {
 	GetData() map[string]interface{}
 }
 
-func getAllDataProviders(client *kubernetes.Clientset) []DataProvider {
-	return []DataProvider{
+func getAllDataProviders(client *kubernetes.Clientset) *[]DataProvider {
+	return &[]DataProvider{
 		dataproviders.NewApiVersionProvider(client),
+		dataproviders.NewNakedPodsProvider(client),
 	}
 }

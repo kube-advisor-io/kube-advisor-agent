@@ -20,8 +20,7 @@ import (
 )
 
 var (
-	config, _    = clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-	clientset, _ = kubernetes.NewForConfig(config)
+
 )
 
 // func watchNamespaces() {
@@ -84,6 +83,9 @@ var (
 
 func main() {
 	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseMQTTFlags())
+
+    config, _    := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	clientset, _ := kubernetes.NewForConfig(config)
 	dataproviders := getAllDataProviders(clientset)
 
 	for range time.Tick(time.Second * 10) {
@@ -94,9 +96,9 @@ func main() {
 	wg.Wait()
 }
 
-func gatherDataAndPublish(dataproviders []DataProvider, mqttClient *mqtt.MQTTClient) {
+func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTClient) {
 	data := make(map[string]interface{})
-	for _, dataprovider := range dataproviders {
+	for _, dataprovider := range *dataproviders {
 		maps.Copy(data, dataprovider.GetData())
 	}
 	jsonString, _ := json.Marshal(data)
