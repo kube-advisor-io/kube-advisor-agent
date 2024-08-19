@@ -2,6 +2,7 @@ package dataproviders
 
 import (
 	"context"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,19 +34,21 @@ func NewNakedPodsProvider(client *kubernetes.Clientset) *NakedPodsProvider {
 func (npp *NakedPodsProvider) startWatching() {
 	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
 		timeOut := int64(60)
-		log.Info("Starting watching pods")
+		log.Info("Starting watching pods...")
 		return npp.client.CoreV1().Pods("").Watch(context.Background(), metav1.ListOptions{TimeoutSeconds: &timeOut})
 	}
 
 	watcher, _ := toolsWatch.NewRetryWatcher("1", &cache.ListWatch{WatchFunc: watchFunc})
-
+	
 	for event := range watcher.ResultChan() {
-		pod := event.Object.(*corev1.Pod)
-
 		switch event.Type {
+		case watch.Error:
+			fmt.Printf("Error: Object: %v", event.Object)
 		case watch.Deleted:
+			pod := event.Object.(*corev1.Pod)
 			npp.deletePod(pod.GetName(), pod.GetNamespace())
 		case watch.Added:
+			pod := event.Object.(*corev1.Pod)
 			var owner string
 			if len(pod.OwnerReferences) != 0 {
 				owner = pod.OwnerReferences[0].Kind
