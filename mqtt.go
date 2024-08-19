@@ -16,31 +16,31 @@
  *    Mike Robertson
  */
 
- package main
+package main
 
- import (
-	 "fmt"
-	 "os"
-     "flag"
-	 MQTT "github.com/eclipse/paho.mqtt.golang"
- )
- 
- /*
- Options:
-  [-help]                      Display help
-  [-a pub|sub]                 Action pub (publish) or sub (subscribe)
-  [-m <message>]               Payload to send
-  [-n <number>]                Number of messages to send or receive
-  [-q 0|1|2]                   Quality of Service
-  [-clean]                     CleanSession (true if -clean is present)
-  [-id <clientid>]             CliendID
-  [-user <user>]               User
-  [-password <password>]       Password
-  [-broker <uri>]              Broker URI
-  [-topic <topic>]             Topic
-  [-store <path>]              Store Directory
- 
- */
+import (
+	"flag"
+	"fmt"
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"os"
+)
+
+/*
+Options:
+
+	[-help]                      Display help
+	[-a pub|sub]                 Action pub (publish) or sub (subscribe)
+	[-m <message>]               Payload to send
+	[-n <number>]                Number of messages to send or receive
+	[-q 0|1|2]                   Quality of Service
+	[-clean]                     CleanSession (true if -clean is present)
+	[-id <clientid>]             CliendID
+	[-user <user>]               User
+	[-password <password>]       Password
+	[-broker <uri>]              Broker URI
+	[-topic <topic>]             Topic
+	[-store <path>]              Store Directory
+*/
 var (
 	client MQTT.Client
 )
@@ -59,15 +59,15 @@ func startMQTT() {
 	store := flag.String("store", ":memory:", "The Store Directory (default use memory store)")
 	flag.Parse()
 
-    if *action != "pub" && *action != "sub" {
-        fmt.Println("Invalid setting for -action, must be pub or sub")
-        return
-    }
+	if *action != "pub" && *action != "sub" {
+		fmt.Println("Invalid setting for -action, must be pub or sub")
+		return
+	}
 
-    if *topic == "" {
-        fmt.Println("Invalid setting for -topic, must not be empty")
-        return
-    }
+	if *topic == "" {
+		fmt.Println("Invalid setting for -topic, must not be empty")
+		return
+	}
 
 	fmt.Printf("Sample Info:\n")
 	fmt.Printf("\taction:    %s\n", *action)
@@ -91,7 +91,7 @@ func startMQTT() {
 	if *store != ":memory:" {
 		opts.SetStore(MQTT.NewFileStore(*store))
 	}
-    connectMQTT(opts, action, num, payload, topic, qos)
+	connectMQTT(opts, action, num, payload, topic, qos)
 }
 
 func connectMQTT(opts *MQTT.ClientOptions, action *string, num *int, payload *string, topic *string, qos *int) {

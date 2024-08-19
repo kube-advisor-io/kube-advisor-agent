@@ -1,8 +1,8 @@
-package main 
+package main
 
 import (
-	"k8s.io/client-go/kubernetes"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/dataproviders"
+	"k8s.io/client-go/kubernetes"
 )
 
 type DataProvider interface {
@@ -10,5 +10,7 @@ type DataProvider interface {
 }
 
 func getAllDataProviders(client *kubernetes.Clientset) []DataProvider {
-   return []DataProvider{dataproviders.NewApiVersionProvider(client)}
+	return []DataProvider{
+		dataproviders.NewApiVersionProvider(client),
+	}
 }

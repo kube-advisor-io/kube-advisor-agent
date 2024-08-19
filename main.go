@@ -1,27 +1,26 @@
 package main
 
 import (
-    // "context"
-    "os"
-    "sync"
-    "time"
-    "fmt"
-    "encoding/json"
-    "maps"
-    // log "github.com/sirupsen/logrus"
-    // corev1 "k8s.io/api/core/v1"
-    // metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    // "k8s.io/apimachinery/pkg/watch"
-    "k8s.io/client-go/kubernetes"
-    // "k8s.io/client-go/tools/cache"
-    "k8s.io/client-go/tools/clientcmd"
-    // toolsWatch "k8s.io/client-go/tools/watch"
-     
+	// "context"
+	"encoding/json"
+	"fmt"
+	"maps"
+	"os"
+	"sync"
+	"time"
+	// log "github.com/sirupsen/logrus"
+	// corev1 "k8s.io/api/core/v1"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// "k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/kubernetes"
+	// "k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
+	// toolsWatch "k8s.io/client-go/tools/watch"
 )
 
 var (
-    config, _    = clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-    clientset, _ = kubernetes.NewForConfig(config)
+	config, _    = clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	clientset, _ = kubernetes.NewForConfig(config)
 )
 
 // func watchNamespaces() {
@@ -83,22 +82,22 @@ var (
 // }
 
 func main() {
-    startMQTT()
-    dataproviders := getAllDataProviders(clientset)
-    for range time.Tick(time.Second * 10) {
-        data := make(map[string]interface{})
-        for _, dataprovider := range dataproviders {
-            maps.Copy(data, dataprovider.GetData())
-        }
-        jsonString, _ := json.Marshal(data)
+	startMQTT()
+	dataproviders := getAllDataProviders(clientset)
+	for range time.Tick(time.Second * 10) {
+		data := make(map[string]interface{})
+		for _, dataprovider := range dataproviders {
+			maps.Copy(data, dataprovider.GetData())
+		}
+		jsonString, _ := json.Marshal(data)
 		fmt.Println(jsonString)
-        token := client.Publish("robert/robertstestsensor/message/testmessage", 2, false, jsonString)
-        token.Wait()
-        fmt.Println("Published data")
-    }
-    var wg sync.WaitGroup
-    // go watchNamespaces()
+		token := client.Publish("robert/robertstestsensor/message/testmessage", 2, false, jsonString)
+		token.Wait()
+		fmt.Println("Published data")
+	}
+	var wg sync.WaitGroup
+	// go watchNamespaces()
 	// go watchPods()
-    wg.Add(1)
-    wg.Wait()
+	wg.Add(1)
+	wg.Wait()
 }
