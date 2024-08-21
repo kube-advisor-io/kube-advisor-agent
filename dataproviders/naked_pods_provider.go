@@ -2,14 +2,13 @@ package dataproviders
 
 import (
 	"context"
-	"fmt"
+	"time"
 	log "github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/cache"
-	toolsWatch "k8s.io/client-go/tools/watch"
+)
+var (
+	listTimeout = int64(60)
 )
 
 type PodInfo struct {
@@ -26,50 +25,64 @@ type NakedPodsProvider struct {
 func NewNakedPodsProvider(client *kubernetes.Clientset) *NakedPodsProvider {
 	instance := new(NakedPodsProvider)
 	instance.client = client
-	instance.pods = []*PodInfo{}
-	go instance.startWatching()
+	err := instance.updatePods()
+	if err != nil {
+		log.Error("Error updating pod list: ", err)
+	}
+	instance.startWatching()
 	return instance
 }
 
 func (npp *NakedPodsProvider) startWatching() {
-	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
-		timeOut := int64(60)
-		log.Info("Starting watching pods...")
-		return npp.client.CoreV1().Pods("").Watch(context.Background(), metav1.ListOptions{TimeoutSeconds: &timeOut})
-	}
+	ticker := time.NewTicker(30 * time.Second)
+	quit := make(chan struct{})
+	go npp.tick(ticker, quit)
+}
 
-	watcher, _ := toolsWatch.NewRetryWatcher("1", &cache.ListWatch{WatchFunc: watchFunc})
-	
-	for event := range watcher.ResultChan() {
-		switch event.Type {
-		case watch.Error:
-			fmt.Printf("Error: Object: %v", event.Object)
-		case watch.Deleted:
-			pod := event.Object.(*corev1.Pod)
-			npp.deletePod(pod.GetName(), pod.GetNamespace())
-		case watch.Added:
-			pod := event.Object.(*corev1.Pod)
-			var owner string
-			if len(pod.OwnerReferences) != 0 {
-				owner = pod.OwnerReferences[0].Kind
+func (npp *NakedPodsProvider) tick(ticker *time.Ticker, quit chan struct{}) {
+	for {
+		select {
+			case <- ticker.C:
+				err := npp.updatePods()
+				if err != nil {
+					log.Error("Error updating pod list: ", err)
+				}
+			case <- quit:
+				ticker.Stop()
+				return
 			}
-			npp.addPod(pod.GetName(), pod.GetNamespace(), owner)
-		}
 	}
 }
+
+func (npp *NakedPodsProvider) updatePods() error{
+	pods, err := npp.client.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{TimeoutSeconds: &listTimeout})
+	if err != nil {
+		return err
+	}
+	npp.pods = []*PodInfo{}
+	for _, pod := range pods.Items {
+		var owner string
+		if len(pod.OwnerReferences) != 0 {
+			owner = pod.OwnerReferences[0].Kind
+		}
+		npp.addPod(pod.GetName(), pod.GetNamespace(), owner)
+	}
+	return nil
+}
+
 
 func (npp *NakedPodsProvider) addPod(name, namespace, owner string) {
 	log.Info("Found pod ", name, " in namespace ", namespace, " with owner ", owner)
 	npp.pods = append(npp.pods, &PodInfo{Name: name, Namespace: namespace, owner: owner})
 }
 
-func (npp *NakedPodsProvider) deletePod(name, namespace string) {
-	for index, podInfo := range npp.pods {
-		if podInfo.Name == name && podInfo.Namespace == namespace {
-			npp.pods = append(npp.pods[:index], npp.pods[index+1:]...)
-		}
-	}
-}
+// func (npp *NakedPodsProvider) deletePod(name, namespace string) {
+// 	for index, podInfo := range npp.pods {
+// 		if podInfo.Name == name && podInfo.Namespace == namespace {
+// 			npp.pods = append(npp.pods[:index], npp.pods[index+1:]...)
+// 		}
+// 	}
+// }
 
 func (npp *NakedPodsProvider) GetData() map[string]interface{} {
 	nakedPods := []*PodInfo{}

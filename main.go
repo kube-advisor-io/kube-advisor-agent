@@ -101,6 +101,7 @@ func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTCl
 	for _, dataprovider := range *dataproviders {
 		maps.Copy(data, dataprovider.GetData())
 	}
+    data["id"] = "my_customer_id1-my_cluster_id1"
 	jsonString, _ := json.Marshal(data)
 	mqttClient.PublishMessage("robert/robertstestsensor/message/testmessage", jsonString)
 	fmt.Printf("Published data %s \n", jsonString)
