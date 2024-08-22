@@ -10,6 +10,7 @@ import (
 type MQTTClient struct {
 	client mqtt.Client
 	qos    int
+	previousMessage string
 }
 
 func ParseMQTTFlags() (*mqtt.ClientOptions, int) {
@@ -59,7 +60,11 @@ func StartNewMQTTClient(opts *mqtt.ClientOptions, qos int) *MQTTClient {
 	return mqttClient
 }
 
-func (mqttClient MQTTClient) PublishMessage(topic string, message interface{}) {
+func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
+	if (mqttClient.previousMessage == message){
+		return
+	}
+
 	token := mqttClient.client.Publish(
 		topic,
 		byte(mqttClient.qos),
@@ -67,4 +72,5 @@ func (mqttClient MQTTClient) PublishMessage(topic string, message interface{}) {
 		message,
 	)
 	token.Wait()
+	mqttClient.previousMessage = message
 }

@@ -34,7 +34,7 @@ func NewNakedPodsProvider(client *kubernetes.Clientset) *NakedPodsProvider {
 }
 
 func (npp *NakedPodsProvider) startWatching() {
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go npp.tick(ticker, quit)
 }
