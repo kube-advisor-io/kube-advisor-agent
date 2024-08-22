@@ -3,7 +3,7 @@ package main
 import (
 	// "context"
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"maps"
 	"os"
 	"sync"
@@ -104,5 +104,4 @@ func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTCl
     data["id"] = "my_customer_id1-my_cluster_id1"
 	jsonString, _ := json.Marshal(data)
 	mqttClient.PublishMessage("robert/robertstestsensor/message/testmessage", string(jsonString))
-	fmt.Printf("Published data %s \n", jsonString)
 }

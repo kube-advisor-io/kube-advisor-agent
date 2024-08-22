@@ -61,7 +61,9 @@ func StartNewMQTTClient(opts *mqtt.ClientOptions, qos int) *MQTTClient {
 }
 
 func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
+	fmt.Printf("Trying to publish data %v ...", message)
 	if (mqttClient.previousMessage == message){
+		fmt.Println("was already sent")
 		return
 	}
 
@@ -73,4 +75,5 @@ func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 	)
 	token.Wait()
 	mqttClient.previousMessage = message
+	fmt.Println("published.")
 }
