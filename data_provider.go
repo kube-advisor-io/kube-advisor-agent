@@ -13,5 +13,6 @@ func getAllDataProviders(client *kubernetes.Clientset) *[]DataProvider {
 	return &[]DataProvider{
 		dataproviders.NewApiVersionProvider(client),
 		dataproviders.NewNakedPodsProvider(client),
+		dataproviders.NewResourcelessPodsProvider(client),
 	}
 }

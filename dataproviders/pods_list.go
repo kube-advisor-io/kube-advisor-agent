@@ -3,6 +3,8 @@ package dataproviders
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,7 +12,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	toolsWatch "k8s.io/client-go/tools/watch"
-	"sync"
 )
 
 var (
@@ -28,7 +29,7 @@ type PodInfo struct {
 type PodsList struct {
 	client                *kubernetes.Clientset
 	latestResourceVersion string
-	Pods                  []*PodInfo
+	Pods                  []*corev1.Pod
 }
 
 func GetPodsListInstance(client *kubernetes.Clientset) *PodsList {
@@ -80,12 +81,8 @@ func (pl *PodsList) watchPods() {
 			pl.deletePod(pod.GetName(), pod.GetNamespace())
 		case watch.Added:
 			pod := event.Object.(*corev1.Pod)
-			var owner string
 			pl.latestResourceVersion = pod.ObjectMeta.ResourceVersion
-			if len(pod.OwnerReferences) != 0 {
-				owner = pod.OwnerReferences[0].Kind
-			}
-			pl.addPod(pod.GetName(), pod.GetNamespace(), owner)
+			pl.addPod(pod)
 		}
 	}
 }
@@ -95,33 +92,41 @@ func (pl *PodsList) updatePods() error {
 	if err != nil {
 		return err
 	}
-	pl.Pods = []*PodInfo{}
+	pl.Pods = []*corev1.Pod{}
 	for _, pod := range pods.Items {
-		var owner string
-		if len(pod.OwnerReferences) != 0 {
-			owner = pod.OwnerReferences[0].Kind
-		}
-		pl.addPod(pod.GetName(), pod.GetNamespace(), owner)
+		pl.addPod(&pod)
 	}
 	pl.latestResourceVersion = pods.ListMeta.ResourceVersion
 	return nil
 }
 
-func (pl *PodsList) addPod(name, namespace, owner string) {
-	log.Info("Found pod ", name, " in namespace ", namespace, " with owner ", owner)
-	pl.Pods = append(pl.Pods, &PodInfo{Name: name, Namespace: namespace, owner: owner})
+func (pl *PodsList) addPod(pod *corev1.Pod) {
+	var owner string
+	if len(pod.OwnerReferences) != 0 {
+		owner = pod.OwnerReferences[0].Kind
+	}
+	log.Info("Found pod ", pod.Name, " in namespace ", pod.Namespace, " with owner ", owner)
+	pl.Pods = append(pl.Pods, pod)
 }
 
 func (pl *PodsList) deletePod(name, namespace string) {
 	log.Info("Pod ", name, " in namespace ", namespace, " was deleted")
-	for index, podInfo := range pl.Pods {
-		if podInfo.Name == name && podInfo.Namespace == namespace {
+	for index, pod := range pl.Pods {
+		if pod.Name == name && pod.Namespace == namespace {
 			pl.Pods = removeFromSlice(pl.Pods, index)
 		}
 	}
 }
 
-func removeFromSlice(s []*PodInfo, i int) []*PodInfo {
+func removeFromSlice(s []*corev1.Pod, i int) []*corev1.Pod {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
+}
+
+func toPodInfo(pods []*corev1.Pod) []*PodInfo {
+	podInfos := []*PodInfo{}
+	for _, pod := range pods {
+		podInfos = append(podInfos, &PodInfo{Name: pod.Name, Namespace: pod.Namespace})
+	}
+	return podInfos
 }
