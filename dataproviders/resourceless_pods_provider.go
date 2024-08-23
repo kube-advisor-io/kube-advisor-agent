@@ -1,7 +1,6 @@
 package dataproviders
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -16,16 +15,16 @@ func NewResourcelessPodsProvider(client *kubernetes.Clientset) *ResourcelessPods
 }
 
 func (npp *ResourcelessPodsProvider) GetData() map[string]interface{} {
-	resourcelessPods := []*corev1.Pod{}
+	resourcelessPods := []*Resource{}
 	for _, pod := range npp.podsList.Pods {
 		for _, container := range pod.Spec.Containers {
 			if len(container.Resources.Limits) == 0 && len(container.Resources.Requests) == 0 {
-				resourcelessPods = append(resourcelessPods, pod)
+				resourcelessPods = append(resourcelessPods, resourceFromPod(pod))
 				break
 			}
 		}
 	}
 	return map[string]interface{}{
-		"resourcelessPods": toPodInfo(resourcelessPods),
+		"resourcelessPods": toResourceInfo(resourcelessPods),
 	}
 }

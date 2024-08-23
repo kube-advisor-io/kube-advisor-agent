@@ -20,15 +20,8 @@ var (
 	podsListInstance *PodsList
 )
 
-type PodInfo struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	owner     string
-}
-
 type PodsList struct {
-	client                *kubernetes.Clientset
-	latestResourceVersion string
+	ResourceList
 	Pods                  []*corev1.Pod
 }
 
@@ -75,6 +68,10 @@ func (pl *PodsList) watchPods() {
 		switch event.Type {
 		case watch.Error:
 			fmt.Printf("Error: Object: %v", event.Object)
+		case watch.Modified:
+			pod := event.Object.(*corev1.Pod)
+			pl.latestResourceVersion = pod.ObjectMeta.ResourceVersion
+			pl.updatePod(pod)
 		case watch.Deleted:
 			pod := event.Object.(*corev1.Pod)
 			pl.latestResourceVersion = pod.ObjectMeta.ResourceVersion
@@ -101,12 +98,18 @@ func (pl *PodsList) updatePods() error {
 }
 
 func (pl *PodsList) addPod(pod *corev1.Pod) {
-	var owner string
-	if len(pod.OwnerReferences) != 0 {
-		owner = pod.OwnerReferences[0].Kind
-	}
-	log.Info("Found pod ", pod.Name, " in namespace ", pod.Namespace, " with owner ", owner)
+	log.Info("Found pod ", pod.Name, " in namespace ", pod.Namespace)
 	pl.Pods = append(pl.Pods, pod)
+}
+
+func (pl *PodsList) updatePod(pod *corev1.Pod) {
+	for index, exisitingPod := range pl.Pods {
+		if exisitingPod.Name == pod.Name && exisitingPod.Namespace == pod.Namespace {
+			pl.Pods[index] = pod
+			break
+		}
+	}
+	log.Info("Updated pod ", pod.Name, " in namespace ", pod.Namespace)
 }
 
 func (pl *PodsList) deletePod(name, namespace string) {
@@ -123,10 +126,8 @@ func removeFromSlice(s []*corev1.Pod, i int) []*corev1.Pod {
 	return s[:len(s)-1]
 }
 
-func toPodInfo(pods []*corev1.Pod) []*PodInfo {
-	podInfos := []*PodInfo{}
-	for _, pod := range pods {
-		podInfos = append(podInfos, &PodInfo{Name: pod.Name, Namespace: pod.Namespace})
-	}
-	return podInfos
+func resourceFromPod(pod *corev1.Pod) *Resource{
+	resource := &Resource{ TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
+	resource.Kind = "Pod"
+	return resource
 }

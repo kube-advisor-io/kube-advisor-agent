@@ -1,7 +1,6 @@
 package dataproviders
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -16,13 +15,13 @@ func NewNakedPodsProvider(client *kubernetes.Clientset) *NakedPodsProvider {
 }
 
 func (npp *NakedPodsProvider) GetData() map[string]interface{} {
-	nakedPods := []*corev1.Pod{}
+	nakedPods := []*Resource{}
 	for _, pod := range npp.podsList.Pods {
 		if len(pod.OwnerReferences) == 0 {
-			nakedPods = append(nakedPods, pod)
+			nakedPods = append(nakedPods, resourceFromPod(pod))
 		}
 	}
 	return map[string]interface{}{
-		"nakedPods": toPodInfo(nakedPods),
+		"nakedPods": toResourceInfo(nakedPods),
 	}
 }
