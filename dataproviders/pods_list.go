@@ -127,7 +127,7 @@ func removeFromSlice(s []*corev1.Pod, i int) []*corev1.Pod {
 }
 
 func resourceFromPod(pod *corev1.Pod) *Resource {
-	resource := &Resource{TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
+	resource := &Resource{TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta, PodSpec: pod.Spec}
 	resource.Kind = "Pod"
 	return resource
 }
