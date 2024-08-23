@@ -22,7 +22,7 @@ var (
 
 type PodsList struct {
 	ResourceList
-	Pods                  []*corev1.Pod
+	Pods []*corev1.Pod
 }
 
 func GetPodsListInstance(client *kubernetes.Clientset) *PodsList {
@@ -126,8 +126,8 @@ func removeFromSlice(s []*corev1.Pod, i int) []*corev1.Pod {
 	return s[:len(s)-1]
 }
 
-func resourceFromPod(pod *corev1.Pod) *Resource{
-	resource := &Resource{ TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
+func resourceFromPod(pod *corev1.Pod) *Resource {
+	resource := &Resource{TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
 	resource.Kind = "Pod"
 	return resource
 }

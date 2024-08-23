@@ -5,7 +5,7 @@ import (
 )
 
 type LabellessResourcesProvider struct {
-	podsList *PodsList
+	podsList        *PodsList
 	deploymentsList *DeploymentsList
 }
 

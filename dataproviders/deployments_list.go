@@ -21,7 +21,7 @@ var (
 
 type DeploymentsList struct {
 	ResourceList
-	Deployments           []*appsv1.Deployment
+	Deployments []*appsv1.Deployment
 }
 
 func GetDeploymentsListInstance(client *kubernetes.Clientset) *DeploymentsList {
@@ -129,8 +129,8 @@ func removeFromDeploymentsSlice(s []*appsv1.Deployment, i int) []*appsv1.Deploym
 	return s[:len(s)-1]
 }
 
-func resourceFromDeployment(pod *appsv1.Deployment) *Resource{
-	resource := &Resource{ TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
+func resourceFromDeployment(pod *appsv1.Deployment) *Resource {
+	resource := &Resource{TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
 	resource.Kind = "Deployment"
 	return resource
 }
