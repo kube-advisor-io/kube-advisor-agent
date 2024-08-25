@@ -31,7 +31,7 @@ func ReadConfig() Config {
 	if err != nil {               // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
-    viper.AddConfigPath("/etc/")
+    viper.AddConfigPath("/etc/config/")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
     viper.MergeInConfig()
