@@ -15,7 +15,7 @@ type MQTTClient struct {
 
 type MQTTOptions struct {
 	clientOpts *mqtt.ClientOptions
-	qos int
+	qos        int
 }
 
 func ParseConfig(config config.MQTTConfig) *MQTTOptions {
