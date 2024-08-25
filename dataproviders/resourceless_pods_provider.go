@@ -14,6 +14,10 @@ func NewResourcelessPodsProvider(client *kubernetes.Clientset) *ResourcelessPods
 	return instance
 }
 
+func (prov *ResourcelessPodsProvider) GetName() string {
+	return "resourceless_pods_provider"
+}
+
 func (npp *ResourcelessPodsProvider) GetData() map[string]interface{} {
 	resourcelessPods := []*Resource{}
 	for _, pod := range npp.podsList.Pods {

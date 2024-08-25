@@ -16,6 +16,10 @@ func NewLabellessResourcesProvider(client *kubernetes.Clientset) *LabellessResou
 	return instance
 }
 
+func (prov *LabellessResourcesProvider) GetName() string {
+	return "labelless_resources_provider"
+}
+
 func (lrp *LabellessResourcesProvider) GetData() map[string]interface{} {
 	labellessResources := []*Resource{}
 	for _, pod := range lrp.podsList.Pods {

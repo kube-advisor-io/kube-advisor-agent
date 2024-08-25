@@ -2,67 +2,62 @@ package mqtt
 
 import (
 	"crypto/tls"
-	"flag"
 	"fmt"
+	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 type MQTTClient struct {
-	client mqtt.Client
-	qos    int
+	client          mqtt.Client
+	qos             int
 	previousMessage string
 }
 
-func ParseMQTTFlags() (*mqtt.ClientOptions, int) {
-	topic := flag.String("topic", "robert/robertstestsensor/message/testmessage", "The topic name to/from which to publish/subscribe")
-	broker := flag.String("broker", "tcp://test.mosquitto.org:1884", "The broker URI. ex: tcp://10.10.1.1:1883")
-	password := flag.String("password", "readwrite", "The password (optional)")
-	user := flag.String("user", "rw", "The User (optional)")
-	clientKey := flag.String("clientKey", "", "The path to the key for the client certificate")
-	clientCert := flag.String("clientCert", "", "The path to the client certificate")
-	cleansess := flag.Bool("clean", true, "Set Clean Session (default false)")
-	qos := *flag.Int("qos", 2, "The Quality of Service 0,1,2 (default 0)")
-	flag.Parse()
+type MQTTOptions struct {
+	clientOpts *mqtt.ClientOptions
+	qos int
+}
 
-	fmt.Printf("Sample Info:\n")
-	fmt.Printf("\tbroker:    %s\n", *broker)
-	fmt.Printf("\tuser:      %s\n", *user)
-	fmt.Printf("\tpassword:  %s\n", *password)
-	fmt.Printf("\tkey:       %s\n", *clientKey)
-	fmt.Printf("\tcert:      %s\n", *clientCert)
-	fmt.Printf("\ttopic:     %s\n", *topic)
-	fmt.Printf("\tqos:       %d\n", qos)
-	fmt.Printf("\tcleansess: %v\n", *cleansess)
+func ParseConfig(config config.MQTTConfig) *MQTTOptions {
+	fmt.Printf("MQTT Config:\n")
+	fmt.Printf("\tbroker:       %s\n", config.Broker)
+	fmt.Printf("\topic:         %s\n", config.Topic)
+	fmt.Printf("\tusername:     %s\n", config.Username)
+	fmt.Printf("\tpassword:     %s\n", config.Password)
+	fmt.Printf("\tkey:          %s\n", config.TlsKeyFile)
+	fmt.Printf("\tcert:         %s\n", config.TlsCertificateFile)
+	fmt.Printf("\tqos:          %d\n", config.Qos)
+	fmt.Printf("\tcleanSession: %v\n", config.CleanSession)
 
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(*broker)
-	if *clientKey != "" && *clientCert != "" {
-		cert, _ := tls.LoadX509KeyPair(*clientCert, *clientKey)
-		opts.SetTLSConfig(&tls.Config{
+	clientOpts := mqtt.NewClientOptions()
+	clientOpts.AddBroker(config.Broker)
+	if config.TlsKeyFile != "" && config.TlsCertificateFile != "" {
+		cert, _ := tls.LoadX509KeyPair(config.TlsKeyFile, config.TlsCertificateFile)
+		clientOpts.SetTLSConfig(&tls.Config{
 			Certificates: []tls.Certificate{cert},
 		})
 	}
 	// opts.SetClientID(*id)
-	opts.SetUsername(*user)
-	opts.SetPassword(*password)
-	opts.SetCleanSession(*cleansess)
-	return opts, qos
+	clientOpts.SetUsername(config.Username)
+	clientOpts.SetPassword(config.Password)
+	clientOpts.SetCleanSession(config.CleanSession)
+	return &MQTTOptions{clientOpts: clientOpts, qos: config.Qos}
 }
 
-func StartNewMQTTClient(opts *mqtt.ClientOptions, qos int) *MQTTClient {
+func StartNewMQTTClient(opts *MQTTOptions) *MQTTClient {
 	mqttClient := new(MQTTClient)
-	mqttClient.client = mqtt.NewClient(opts)
+	mqttClient.client = mqtt.NewClient(opts.clientOpts)
 	if token := mqttClient.client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
-	mqttClient.qos = qos
-	fmt.Printf("MQTT Client Publisher started with opts %v, QOS %v\n", *opts, qos)
+	mqttClient.qos = opts.qos
+	fmt.Printf("MQTT Client Publisher started with opts %v", *opts.clientOpts)
 	return mqttClient
 }
 
 func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 	fmt.Printf("Trying to publish data %v ...", message)
-	if (mqttClient.previousMessage == message){
+	if mqttClient.previousMessage == message {
 		fmt.Println("was already sent")
 		return
 	}

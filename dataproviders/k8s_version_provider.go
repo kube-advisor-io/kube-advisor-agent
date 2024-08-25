@@ -18,6 +18,10 @@ func NewApiVersionProvider(client *kubernetes.Clientset) *K8sVersionProvider {
 	return instance
 }
 
+func (prov *K8sVersionProvider) GetName() string {
+	return "k8s_version_provider"
+}
+
 func (prov *K8sVersionProvider) GetData() map[string]interface{} {
 	return map[string]interface{}{"k8sVersion": prov.k8sVersion.String()}
 }

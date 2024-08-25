@@ -14,6 +14,10 @@ func NewNakedPodsProvider(client *kubernetes.Clientset) *NakedPodsProvider {
 	return instance
 }
 
+func (prov *NakedPodsProvider) GetName() string {
+	return "naked_pods_provider"
+}
+
 func (npp *NakedPodsProvider) GetData() map[string]interface{} {
 	nakedPods := []*Resource{}
 	for _, pod := range npp.podsList.Pods {

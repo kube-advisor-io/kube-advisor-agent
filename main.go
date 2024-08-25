@@ -15,13 +15,12 @@ import (
 	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
 	"k8s.io/client-go/kubernetes"
 	// "k8s.io/client-go/tools/cache"
+	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"k8s.io/client-go/tools/clientcmd"
 	// toolsWatch "k8s.io/client-go/tools/watch"
 )
 
-var (
-
-)
+var ()
 
 // func watchNamespaces() {
 
@@ -82,26 +81,28 @@ var (
 // }
 
 func main() {
-	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseMQTTFlags())
+	config := config.ReadConfig()
+	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseConfig(config.MQTT))
 
-    config, _    := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-	clientset, _ := kubernetes.NewForConfig(config)
-	dataproviders := getAllDataProviders(clientset)
+	kubeConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	clientset, _ := kubernetes.NewForConfig(kubeConfig)
+	dataproviders := getAllDataProviders(clientset, config.DisabledProviders)
 
 	for range time.Tick(time.Second * 10) {
-		gatherDataAndPublish(dataproviders, mqttClient)
+		gatherDataAndPublish(dataproviders, mqttClient, config)
 	}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	wg.Wait()
 }
 
-func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTClient) {
+func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
 	data := make(map[string]interface{})
 	for _, dataprovider := range *dataproviders {
 		maps.Copy(data, dataprovider.GetData())
 	}
-    data["id"] = "my_customer_id1-my_cluster_id1"
+	data["id"] = config.CustomerID + "_" + config.ClusterID
+	data["version"] = "0.1" // schema version
 	jsonString, _ := json.Marshal(data)
-	mqttClient.PublishMessage("robert/robertstestsensor/message/testmessage", string(jsonString))
+	mqttClient.PublishMessage(config.MQTT.Topic, string(jsonString))
 }

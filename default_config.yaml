@@ -1,0 +1,12 @@
+customerID: robert_test_customer
+clusterID: roberts_local_minikube
+disabledProviders: []
+mqtt:
+  broker: "tcp://test.mosquitto.org:1884"
+  topic: "robert/robertstestsensor/message/testmessage"
+  qos: 2
+  tlsKeyFile: "" # "path/to/tls/key"
+  tlsCertificateFile: "" # "path/to/tls/certificate"
+  username: "rw"
+  password: "readwrite"
+  cleanSession: true
