@@ -25,9 +25,7 @@ func main() {
 		gatherDataAndPublish(dataproviders, mqttClient, config)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	wg.Wait()
+	waitIndefinitely()
 }
 
 func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
@@ -35,8 +33,16 @@ func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTCl
 	for _, dataprovider := range *dataproviders {
 		maps.Copy(data, dataprovider.GetData())
 	}
-	data["id"] = config.CustomerID + "_" + config.ClusterID
+	data["id"] = config.OrganizationID + "_" + config.ClusterID
 	data["version"] = "0.1" // schema version
+	data["organizationID"] = config.OrganizationID
+	data["clusterID"] = config.ClusterID
 	jsonString, _ := json.Marshal(data)
 	mqttClient.PublishMessage(config.MQTT.Topic, string(jsonString))
+}
+
+func waitIndefinitely() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
 }
