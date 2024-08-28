@@ -12,6 +12,7 @@ type MQTTConfig struct {
 	Qos                int    `yaml:"qos"`
 	TlsKeyFile         string `yaml:"tlsKeyFile"`
 	TlsCertificateFile string `yaml:"tlsCertificateFile"`
+	CACertificate      string `yaml:"caCertificate"`
 	Username           string `yaml:"username"`
 	Password           string `yaml:"password"`
 	ClientID		   string `yaml:"clientID"`

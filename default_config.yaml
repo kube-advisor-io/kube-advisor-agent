@@ -3,10 +3,11 @@ clusterID: 6b54951c-3031-4372-af53-b50cae9d8ac7
 disabledProviders: []
 mqtt:
   broker: "tls://axeofcqtiseyl-ats.iot.eu-central-1.amazonaws.com:8883"
-  topic: "sdk/test/js"
+  topic: "kubeadvisor/clusterdata/v1"
   qos: 1
-  tlsKeyFile: "/etc/iotcreds/private.key" # "path/to/tls/key"
-  tlsCertificateFile: "/etc/iotcreds/cert.pem" # "path/to/tls/certificate"
+  caCertificate: "/etc/certs/ca.pem"
+  tlsKeyFile: "/etc/certs/private.key" # "path/to/tls/key"
+  tlsCertificateFile: "/etc/certs/cert.pem" # "path/to/tls/certificate"
   username: ""
   password: ""
   clientID: "basicPubSub"

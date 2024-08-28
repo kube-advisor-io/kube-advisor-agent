@@ -34,7 +34,7 @@ func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTCl
 		maps.Copy(data, dataprovider.GetData())
 	}
 	data["id"] = config.OrganizationID + "_" + config.ClusterID
-	data["version"] = "0.1" // schema version
+	data["version"] = "1" // schema version
 	data["organizationID"] = config.OrganizationID
 	data["clusterID"] = config.ClusterID
 	jsonString, _ := json.Marshal(data)

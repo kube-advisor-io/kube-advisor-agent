@@ -37,7 +37,7 @@ func ParseConfig(config config.MQTTConfig) *MQTTOptions {
 	clientOpts.AddBroker(config.Broker)
 	if config.TlsKeyFile != "" && config.TlsCertificateFile != "" {
 		certpool := x509.NewCertPool()
-		ca, err := os.ReadFile("/etc/iotcreds/ca.pem")
+		ca, err := os.ReadFile(config.CACertificate)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
