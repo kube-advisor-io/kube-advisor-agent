@@ -14,6 +14,7 @@ type MQTTConfig struct {
 	TlsCertificateFile string `yaml:"tlsCertificateFile"`
 	Username           string `yaml:"username"`
 	Password           string `yaml:"password"`
+	ClientID		   string `yaml:"clientID"`
 	CleanSession       bool   `yaml:"cleanSession"`
 }
 

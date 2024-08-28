@@ -5,6 +5,9 @@ import (
 	"fmt"
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"os"
+	"time"
+	"crypto/x509"
 )
 
 type MQTTClient struct {
@@ -21,9 +24,10 @@ type MQTTOptions struct {
 func ParseConfig(config config.MQTTConfig) *MQTTOptions {
 	fmt.Printf("MQTT Config:\n")
 	fmt.Printf("\tbroker:       %s\n", config.Broker)
-	fmt.Printf("\topic:         %s\n", config.Topic)
+	fmt.Printf("\ttopic:        %s\n", config.Topic)
 	fmt.Printf("\tusername:     %s\n", config.Username)
 	fmt.Printf("\tpassword:     %s\n", config.Password)
+	fmt.Printf("\tclientID:     %s\n", config.ClientID)
 	fmt.Printf("\tkey:          %s\n", config.TlsKeyFile)
 	fmt.Printf("\tcert:         %s\n", config.TlsCertificateFile)
 	fmt.Printf("\tqos:          %d\n", config.Qos)
@@ -32,14 +36,36 @@ func ParseConfig(config config.MQTTConfig) *MQTTOptions {
 	clientOpts := mqtt.NewClientOptions()
 	clientOpts.AddBroker(config.Broker)
 	if config.TlsKeyFile != "" && config.TlsCertificateFile != "" {
-		cert, _ := tls.LoadX509KeyPair(config.TlsKeyFile, config.TlsCertificateFile)
+		certpool := x509.NewCertPool()
+		ca, err := os.ReadFile("/etc/iotcreds/ca.pem")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		certpool.AppendCertsFromPEM(ca)
+		cert, err := tls.LoadX509KeyPair(config.TlsCertificateFile, config.TlsKeyFile)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 		clientOpts.SetTLSConfig(&tls.Config{
+			RootCAs: certpool,
 			Certificates: []tls.Certificate{cert},
+			ClientAuth: tls.NoClientCert,
+			ClientCAs: nil,
 		})
 	}
+	clientOpts.SetMaxReconnectInterval(1 * time.Second)
+	clientOpts.SetKeepAlive(30 * time.Second)
+	if config.Username != "" {
+		fmt.Println("Set username "+ config.Username)
+		clientOpts.SetUsername(config.Username)
+		clientOpts.SetPassword(config.Password)
+	}
+	if config.ClientID != "" {
+		clientOpts.SetClientID(config.ClientID)
+		fmt.Println("Set client id "+ config.ClientID)
+	}
 	// opts.SetClientID(*id)
-	clientOpts.SetUsername(config.Username)
-	clientOpts.SetPassword(config.Password)
+
 	clientOpts.SetCleanSession(config.CleanSession)
 	return &MQTTOptions{clientOpts: clientOpts, qos: config.Qos}
 }
