@@ -1,5 +1,5 @@
-organizationID: a7196ee5-5189-41ea-b479-c04fdb9858ec
-clusterID: 6b54951c-3031-4372-af53-b50cae9d8ac7
+organizationID: 
+clusterID: 
 disabledProviders: []
 mqtt:
   broker: "tls://axeofcqtiseyl-ats.iot.eu-central-1.amazonaws.com:8883"
