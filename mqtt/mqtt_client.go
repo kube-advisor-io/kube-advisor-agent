@@ -97,5 +97,5 @@ func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 	)
 	token.Wait()
 	mqttClient.previousMessage = message
-	log.Info("published.")
+	log.Info("published ", len(message), " bytes.")
 }
