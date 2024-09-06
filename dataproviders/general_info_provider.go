@@ -3,6 +3,7 @@ package dataproviders
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,12 +13,14 @@ import (
 type GeneralInfoProvider struct {
 	podsList *PodsList
 	client *kubernetes.Clientset
+	config config.Config
 }
 
 func NewGeneralInfoProvider(client *kubernetes.Clientset, config config.Config) *GeneralInfoProvider {
 	instance := new(GeneralInfoProvider)
 	instance.podsList = GetPodsListInstance(client, config.IgnoredNamespaces)
 	instance.client = client
+	instance.config = config
 	return instance
 }
 
@@ -27,6 +30,12 @@ func (prov *GeneralInfoProvider) GetName() string {
 
 func (npp *GeneralInfoProvider) GetData() map[string]interface{} {
 	namespacesList, err := npp.client.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
+	var namespacesNames []string
+	for _, namespace := range namespacesList.Items {
+		if !slices.Contains(npp.config.IgnoredNamespaces, namespace.Name){
+			namespacesNames = append(namespacesNames, namespace.Name)
+		}
+	}
 	if err != nil {
 		fmt.Println("error getting namespaces:", err)
 	}
@@ -38,7 +47,7 @@ func (npp *GeneralInfoProvider) GetData() map[string]interface{} {
 
 	return map[string]interface{}{
 		"podsCount": len(npp.podsList.Pods),
-		"namespacesCount": len(namespacesList.Items),
+		"namespacesCount": len(namespacesNames),
 		"nodesCount": len(nodeList.Items),
 	}
 }
