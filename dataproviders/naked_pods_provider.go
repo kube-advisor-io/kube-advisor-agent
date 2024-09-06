@@ -16,7 +16,7 @@ func NewNakedPodsProvider(client *kubernetes.Clientset, config config.Config) *N
 }
 
 func (prov *NakedPodsProvider) GetName() string {
-	return "naked_pods_provider"
+	return "nakedPodsProvider"
 }
 
 func (npp *NakedPodsProvider) GetData() map[string]interface{} {

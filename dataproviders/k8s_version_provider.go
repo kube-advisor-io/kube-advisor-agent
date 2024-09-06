@@ -19,7 +19,7 @@ func NewApiVersionProvider(client *kubernetes.Clientset) *K8sVersionProvider {
 }
 
 func (prov *K8sVersionProvider) GetName() string {
-	return "k8s_version_provider"
+	return "k8sVersionProvider"
 }
 
 func (prov *K8sVersionProvider) GetData() map[string]interface{} {

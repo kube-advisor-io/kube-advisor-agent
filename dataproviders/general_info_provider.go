@@ -25,7 +25,7 @@ func NewGeneralInfoProvider(client *kubernetes.Clientset, config config.Config) 
 }
 
 func (prov *GeneralInfoProvider) GetName() string {
-	return "general_info_provider"
+	return "generalInfoProvider"
 }
 
 func (npp *GeneralInfoProvider) GetData() map[string]interface{} {

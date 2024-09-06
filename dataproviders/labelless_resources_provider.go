@@ -18,7 +18,7 @@ func NewLabellessResourcesProvider(client *kubernetes.Clientset, config config.C
 }
 
 func (prov *LabellessResourcesProvider) GetName() string {
-	return "labelless_resources_provider"
+	return "labellessResourcesProvider"
 }
 
 func (lrp *LabellessResourcesProvider) GetData() map[string]interface{} {
