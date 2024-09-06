@@ -2,6 +2,7 @@ package mqtt
 
 import (
 	"crypto/tls"
+	log "github.com/sirupsen/logrus"
 	"fmt"
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -22,16 +23,16 @@ type MQTTOptions struct {
 }
 
 func ParseConfig(config config.MQTTConfig) *MQTTOptions {
-	fmt.Printf("MQTT Config:\n")
-	fmt.Printf("\tbroker:       %s\n", config.Broker)
-	fmt.Printf("\ttopic:        %s\n", config.Topic)
-	fmt.Printf("\tusername:     %s\n", config.Username)
-	fmt.Printf("\tpassword:     %s\n", config.Password)
-	fmt.Printf("\tclientID:     %s\n", config.ClientID)
-	fmt.Printf("\tkey:          %s\n", config.TlsKeyFile)
-	fmt.Printf("\tcert:         %s\n", config.TlsCertificateFile)
-	fmt.Printf("\tqos:          %d\n", config.Qos)
-	fmt.Printf("\tcleanSession: %v\n", config.CleanSession)
+	log.Info("MQTT Config:\n")
+	log.Info("broker:       ", config.Broker)
+	log.Info("topic:        ", config.Topic)
+	log.Info("username:     ", config.Username)
+	log.Info("password:     ", config.Password)
+	log.Info("clientID:     ", config.ClientID)
+	log.Info("key:          ", config.TlsKeyFile)
+	log.Info("cert:         ", config.TlsCertificateFile)
+	log.Info("qos:          ", config.Qos)
+	log.Info("cleanSession: ", config.CleanSession)
 
 	clientOpts := mqtt.NewClientOptions()
 	clientOpts.AddBroker(config.Broker)
@@ -62,7 +63,7 @@ func ParseConfig(config config.MQTTConfig) *MQTTOptions {
 	}
 	if config.ClientID != "" {
 		clientOpts.SetClientID(config.ClientID)
-		fmt.Println("Set client id "+ config.ClientID)
+		log.Info("Set client id "+ config.ClientID)
 	}
 	// opts.SetClientID(*id)
 
@@ -77,14 +78,14 @@ func StartNewMQTTClient(opts *MQTTOptions) *MQTTClient {
 		panic(token.Error())
 	}
 	mqttClient.qos = opts.qos
-	fmt.Printf("MQTT Client Publisher started with opts %v", *opts.clientOpts)
+	log.Info("MQTT Client Publisher started with opts ", *opts.clientOpts)
 	return mqttClient
 }
 
 func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
-	fmt.Printf("Trying to publish data %v ...", message)
+	log.Info(fmt.Sprintf("Trying to publish data %v ...", message))
 	if mqttClient.previousMessage == message {
-		fmt.Println("was already sent")
+		log.Info("was already sent")
 		return
 	}
 
@@ -96,5 +97,5 @@ func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 	)
 	token.Wait()
 	mqttClient.previousMessage = message
-	fmt.Println("published.")
+	log.Info("published.")
 }

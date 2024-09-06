@@ -1,6 +1,7 @@
 package dataproviders
 
 import (
+	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -8,9 +9,9 @@ type NakedPodsProvider struct {
 	podsList *PodsList
 }
 
-func NewNakedPodsProvider(client *kubernetes.Clientset) *NakedPodsProvider {
+func NewNakedPodsProvider(client *kubernetes.Clientset, config config.Config) *NakedPodsProvider {
 	instance := new(NakedPodsProvider)
-	instance.podsList = GetPodsListInstance(client)
+	instance.podsList = GetPodsListInstance(client, config.IgnoredNamespaces)
 	return instance
 }
 

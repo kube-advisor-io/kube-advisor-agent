@@ -1,6 +1,7 @@
 package dataproviders
 
 import (
+	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -8,9 +9,9 @@ type ResourcelessPodsProvider struct {
 	podsList *PodsList
 }
 
-func NewResourcelessPodsProvider(client *kubernetes.Clientset) *ResourcelessPodsProvider {
+func NewResourcelessPodsProvider(client *kubernetes.Clientset, config config.Config) *ResourcelessPodsProvider {
 	instance := new(ResourcelessPodsProvider)
-	instance.podsList = GetPodsListInstance(client)
+	instance.podsList = GetPodsListInstance(client, config.IgnoredNamespaces)
 	return instance
 }
 

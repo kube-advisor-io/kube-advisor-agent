@@ -3,6 +3,7 @@ package dataproviders
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -25,19 +26,20 @@ type PodsList struct {
 	Pods []*corev1.Pod
 }
 
-func GetPodsListInstance(client *kubernetes.Clientset) *PodsList {
+func GetPodsListInstance(client *kubernetes.Clientset, ignoredNamespaces []string) *PodsList {
 	if podsListInstance == nil {
 		lock.Lock()
 		defer lock.Unlock()
 		if podsListInstance == nil {
 			podsListInstance = new(PodsList)
 			podsListInstance.client = client
+			podsListInstance.ignoredNamespaces = ignoredNamespaces
 			podsListInstance.startWatching()
 		} else {
-			fmt.Println("Single instance already created.")
+			log.Trace("Single instance already created.")
 		}
 	} else {
-		fmt.Println("Single instance already created.")
+		log.Trace("Single instance already created.")
 	}
 
 	return podsListInstance
@@ -98,7 +100,11 @@ func (pl *PodsList) updatePods() error {
 }
 
 func (pl *PodsList) addPod(pod *corev1.Pod) {
-	log.Info("Found pod ", pod.Name, " in namespace ", pod.Namespace)
+	log.Trace("Found pod ", pod.Name, " in namespace ", pod.Namespace)
+	if slices.Contains(pl.ignoredNamespaces, pod.Namespace){
+		log.Trace("Ignoring the pod", pod.Name, ", since it is in the ignored namespace " + pod.Namespace)
+		return
+	}
 	pl.Pods = append(pl.Pods, pod)
 }
 
@@ -109,11 +115,11 @@ func (pl *PodsList) updatePod(pod *corev1.Pod) {
 			break
 		}
 	}
-	log.Info("Updated pod ", pod.Name, " in namespace ", pod.Namespace)
+	log.Trace("Updated pod ", pod.Name, " in namespace ", pod.Namespace)
 }
 
 func (pl *PodsList) deletePod(name, namespace string) {
-	log.Info("Pod ", name, " in namespace ", namespace, " was deleted")
+	log.Trace("Pod ", name, " in namespace ", namespace, " was deleted")
 	for index, pod := range pl.Pods {
 		if pod.Name == name && pod.Namespace == namespace {
 			pl.Pods = removeFromSlice(pl.Pods, index)

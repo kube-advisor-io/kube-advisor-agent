@@ -9,6 +9,7 @@ import (
 
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -19,7 +20,12 @@ func main() {
 
 	kubeConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
 	clientset, _ := kubernetes.NewForConfig(kubeConfig)
-	dataproviders := getAllDataProviders(clientset, config.DisabledProviders)
+	dataproviders := getAllDataProviders(clientset, config)
+	logLevel, err :=  log.ParseLevel(config.LogLevel)
+	if err != nil {
+		logLevel = log.InfoLevel
+	}
+	log.SetLevel(logLevel)
 
 	for range time.Tick(time.Second * 10) {
 		gatherDataAndPublish(dataproviders, mqttClient, config)

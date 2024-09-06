@@ -1,6 +1,7 @@
 package dataproviders
 
 import (
+	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -9,10 +10,10 @@ type LabellessResourcesProvider struct {
 	deploymentsList *DeploymentsList
 }
 
-func NewLabellessResourcesProvider(client *kubernetes.Clientset) *LabellessResourcesProvider {
+func NewLabellessResourcesProvider(client *kubernetes.Clientset, config config.Config) *LabellessResourcesProvider {
 	instance := new(LabellessResourcesProvider)
-	instance.podsList = GetPodsListInstance(client)
-	instance.deploymentsList = GetDeploymentsListInstance(client)
+	instance.podsList = GetPodsListInstance(client, config.IgnoredNamespaces)
+	instance.deploymentsList = GetDeploymentsListInstance(client, config.IgnoredNamespaces)
 	return instance
 }
 

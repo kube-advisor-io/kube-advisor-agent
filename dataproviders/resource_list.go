@@ -14,6 +14,7 @@ type Resource struct {
 
 type ResourceList struct {
 	client                *kubernetes.Clientset
+	ignoredNamespaces     []string
 	latestResourceVersion string
 }
 

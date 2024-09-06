@@ -2,7 +2,7 @@ package dataproviders
 
 import (
 	"context"
-	"fmt"
+	"slices"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -24,19 +24,20 @@ type DeploymentsList struct {
 	Deployments []*appsv1.Deployment
 }
 
-func GetDeploymentsListInstance(client *kubernetes.Clientset) *DeploymentsList {
+func GetDeploymentsListInstance(client *kubernetes.Clientset, ignoredNamespaces []string) *DeploymentsList {
 	if deploymentsListInstance == nil {
 		deploymentsListLock.Lock()
 		defer deploymentsListLock.Unlock()
 		if deploymentsListInstance == nil {
 			deploymentsListInstance = new(DeploymentsList)
 			deploymentsListInstance.client = client
+			deploymentsListInstance.ignoredNamespaces = ignoredNamespaces
 			deploymentsListInstance.startWatching()
 		} else {
-			fmt.Println("Single instance already created.")
+			log.Trace("Single instance already created.")
 		}
 	} else {
-		fmt.Println("Single instance already created.")
+		log.Trace("Single instance already created.")
 	}
 
 	return deploymentsListInstance
@@ -66,7 +67,7 @@ func (dl *DeploymentsList) watchDeployments() {
 	for event := range watcher.ResultChan() {
 		switch event.Type {
 		case watch.Error:
-			fmt.Printf("Error: Object: %v", event.Object)
+			log.Error("Error: Object: %v", event.Object)
 		case watch.Modified:
 			deployment := event.Object.(*appsv1.Deployment)
 			dl.latestResourceVersion = deployment.ObjectMeta.ResourceVersion
@@ -97,16 +98,20 @@ func (dl *DeploymentsList) updateDeployments() error {
 }
 
 func (dl *DeploymentsList) addDeployment(deployment *appsv1.Deployment) {
+	if slices.Contains(dl.ignoredNamespaces, deployment.Namespace){
+		log.Trace("Ignoring the deployment", deployment.Name, ", since it is in the ignored namespace " + deployment.Namespace)
+		return
+	}
 	var owner string
 	if len(deployment.OwnerReferences) != 0 {
 		owner = deployment.OwnerReferences[0].Kind
 	}
-	log.Info("Found deployment ", deployment.Name, " in namespace ", deployment.Namespace, " with owner ", owner)
+	log.Trace("Found deployment ", deployment.Name, " in namespace ", deployment.Namespace, " with owner ", owner)
 	dl.Deployments = append(dl.Deployments, deployment)
 }
 
 func (dl *DeploymentsList) deleteDeployment(name, namespace string) {
-	log.Info("Deployment ", name, " in namespace ", namespace, " was deleted")
+	log.Trace("Deployment ", name, " in namespace ", namespace, " was deleted")
 	for index, deployment := range dl.Deployments {
 		if deployment.Name == name && deployment.Namespace == namespace {
 			dl.Deployments = removeFromDeploymentsSlice(dl.Deployments, index)
@@ -121,7 +126,7 @@ func (pl *DeploymentsList) updateDeployment(deployment *appsv1.Deployment) {
 			break
 		}
 	}
-	log.Info("Updated deployment ", deployment.Name, " in namespace ", deployment.Namespace)
+	log.Trace("Updated deployment ", deployment.Name, " in namespace ", deployment.Namespace)
 }
 
 func removeFromDeploymentsSlice(s []*appsv1.Deployment, i int) []*appsv1.Deployment {

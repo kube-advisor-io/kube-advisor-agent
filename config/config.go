@@ -20,9 +20,11 @@ type MQTTConfig struct {
 }
 
 type Config struct {
+	LogLevel          string     `yaml:"logLevel"`
 	ClusterID         string     `yaml:"clusterID"`
 	OrganizationID    string     `yaml:"organizationID"`
 	DisabledProviders []string   `yaml:"disabledProviders"`
+	IgnoredNamespaces []string   `yaml:"ignoredNamespaces"`
 	MQTT              MQTTConfig `yaml:"mqtt"`
 }
 
