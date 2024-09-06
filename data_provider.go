@@ -11,6 +11,7 @@ import (
 type DataProvider interface {
 	GetName() string
 	GetData() map[string]interface{}
+	GetVersion() int32
 }
 
 func getAllDataProviders(client *kubernetes.Clientset, config config.Config) *[]DataProvider {
@@ -23,7 +24,7 @@ func getAllDataProviders(client *kubernetes.Clientset, config config.Config) *[]
 	}
 	filteredDataProviders := []DataProvider{}
 	for _, dataProvider := range *dataProviders {
-		if !slices.Contains(config.DisabledProviders, dataProvider.GetName()){
+		if !slices.Contains(config.DisabledProviders, dataProvider.GetName()) {
 			filteredDataProviders = append(filteredDataProviders, dataProvider)
 		}
 	}

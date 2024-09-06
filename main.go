@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"maps"
 	"os"
 	"sync"
 	"time"
@@ -35,15 +34,20 @@ func main() {
 }
 
 func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
+	messageData := make(map[string]interface{})
+	messageData["id"] = config.OrganizationID + "_" + config.ClusterID
+	messageData["version"] = 2 // schema version
+	messageData["organizationID"] = config.OrganizationID
+	messageData["clusterID"] = config.ClusterID
+	
 	data := make(map[string]interface{})
 	for _, dataprovider := range *dataproviders {
-		maps.Copy(data, dataprovider.GetData())
+		providerData := dataprovider.GetData()
+		providerData["version"] = dataprovider.GetVersion()
+		data[dataprovider.GetName()] = providerData
 	}
-	data["id"] = config.OrganizationID + "_" + config.ClusterID
-	data["version"] = "1" // schema version
-	data["organizationID"] = config.OrganizationID
-	data["clusterID"] = config.ClusterID
-	jsonString, _ := json.Marshal(data)
+	messageData["data"] = data
+	jsonString, _ := json.Marshal(messageData)
 	mqttClient.PublishMessage(config.MQTT.Topic, string(jsonString))
 }
 

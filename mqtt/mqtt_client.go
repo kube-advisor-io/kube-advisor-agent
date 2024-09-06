@@ -89,13 +89,13 @@ func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 		return
 	}
 
-	token := mqttClient.client.Publish(
-		topic,
-		byte(mqttClient.qos),
-		false,
-		message,
-	)
-	token.Wait()
+	// token := mqttClient.client.Publish(
+	// 	topic,
+	// 	byte(mqttClient.qos),
+	// 	false,
+	// 	message,
+	// )
+	// token.Wait()
 	mqttClient.previousMessage = message
 	log.Info("published ", len(message), " bytes.")
 }

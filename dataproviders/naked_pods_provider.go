@@ -19,6 +19,10 @@ func (prov *NakedPodsProvider) GetName() string {
 	return "nakedPodsProvider"
 }
 
+func (prov *NakedPodsProvider) GetVersion() int32 {
+	return 1
+}
+
 func (npp *NakedPodsProvider) GetData() map[string]interface{} {
 	nakedPods := []*Resource{}
 	for _, pod := range npp.podsList.Pods {
@@ -27,6 +31,6 @@ func (npp *NakedPodsProvider) GetData() map[string]interface{} {
 		}
 	}
 	return map[string]interface{}{
-		"nakedPods": toResourceInfo(nakedPods),
+		"items": toResourceInfo(nakedPods),
 	}
 }

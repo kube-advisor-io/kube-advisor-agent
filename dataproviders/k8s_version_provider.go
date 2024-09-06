@@ -22,6 +22,10 @@ func (prov *K8sVersionProvider) GetName() string {
 	return "k8sVersionProvider"
 }
 
+func (prov *K8sVersionProvider) GetVersion() int32 {
+	return 1
+}
+
 func (prov *K8sVersionProvider) GetData() map[string]interface{} {
 	return map[string]interface{}{"k8sVersion": prov.k8sVersion.String()}
 }
