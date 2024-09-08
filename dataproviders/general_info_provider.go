@@ -28,10 +28,6 @@ func (prov *GeneralInfoProvider) GetName() string {
 	return "generalInfoProvider"
 }
 
-func (prov *GeneralInfoProvider) GetVersion() int32 {
-	return 1
-}
-
 func (npp *GeneralInfoProvider) GetData() map[string]interface{} {
 	namespacesList, err := npp.client.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
 	var namespacesNames []string
@@ -47,6 +43,7 @@ func (npp *GeneralInfoProvider) GetData() map[string]interface{} {
 	if err != nil {
 		fmt.Println("error getting nodes:", err)
 	}
+
 
 	return map[string]interface{}{
 		"podsCount": len(npp.podsList.Pods),

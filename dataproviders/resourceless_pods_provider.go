@@ -19,10 +19,6 @@ func (prov *ResourcelessPodsProvider) GetName() string {
 	return "resourcelessPodsProvider"
 }
 
-func (prov *ResourcelessPodsProvider) GetVersion() int32 {
-	return 1
-}
-
 func (npp *ResourcelessPodsProvider) GetData() map[string]interface{} {
 	resourcelessPods := []*Resource{}
 	for _, pod := range npp.podsList.Pods {
@@ -34,6 +30,6 @@ func (npp *ResourcelessPodsProvider) GetData() map[string]interface{} {
 		}
 	}
 	return map[string]interface{}{
-		"items": toResourceInfo(resourcelessPods),
+		"resourcelessPods": toResourceInfo(resourcelessPods),
 	}
 }

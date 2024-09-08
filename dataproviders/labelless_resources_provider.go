@@ -21,10 +21,6 @@ func (prov *LabellessResourcesProvider) GetName() string {
 	return "labellessResourcesProvider"
 }
 
-func (prov *LabellessResourcesProvider) GetVersion() int32 {
-	return 1
-}
-
 func (lrp *LabellessResourcesProvider) GetData() map[string]interface{} {
 	labellessResources := []*Resource{}
 	for _, pod := range lrp.podsList.Pods {
@@ -38,6 +34,6 @@ func (lrp *LabellessResourcesProvider) GetData() map[string]interface{} {
 		}
 	}
 	return map[string]interface{}{
-		"items": toResourceInfo(labellessResources),
+		"labellessResources": toResourceInfo(labellessResources),
 	}
 }
