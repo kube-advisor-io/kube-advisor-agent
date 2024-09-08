@@ -16,7 +16,7 @@ func NewResourcelessPodsProvider(client *kubernetes.Clientset, config config.Con
 }
 
 func (prov *ResourcelessPodsProvider) GetName() string {
-	return "resourcelessPodsProvider"
+	return "resourceless_pods_provider"
 }
 
 func (npp *ResourcelessPodsProvider) GetData() map[string]interface{} {
