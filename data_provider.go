@@ -5,7 +5,9 @@ import (
 
 	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/dataproviders"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	log "github.com/sirupsen/logrus"
 )
 
 type DataProvider interface {
@@ -14,7 +16,9 @@ type DataProvider interface {
 	GetVersion() int32
 }
 
-func getAllDataProviders(client *kubernetes.Clientset, config config.Config) *[]DataProvider {
+func getAllDataProviders(client *kubernetes.Clientset, dynamicClient *dynamic.DynamicClient, config config.Config) *[]DataProvider {
+	
+	log.Info("Resources: ", dataproviders.GetResourcesListInstance(dynamicClient, config.IgnoredNamespaces).ResourceList)
 	dataProviders := &[]DataProvider{
 		dataproviders.NewApiVersionProvider(client),
 		dataproviders.NewNakedPodsProvider(client, config),

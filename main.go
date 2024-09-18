@@ -9,22 +9,24 @@ import (
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 func main() {
 	config := config.ReadConfig()
-	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseConfig(config.MQTT))
-
-	kubeConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-	clientset, _ := kubernetes.NewForConfig(kubeConfig)
-	dataproviders := getAllDataProviders(clientset, config)
 	logLevel, err :=  log.ParseLevel(config.LogLevel)
 	if err != nil {
 		logLevel = log.InfoLevel
 	}
 	log.SetLevel(logLevel)
+
+	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseConfig(config.MQTT))
+	kubeConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	clientset, _ := kubernetes.NewForConfig(kubeConfig)
+	dynamicClient, _ := dynamic.NewForConfig(kubeConfig)
+	dataproviders := getAllDataProviders(clientset, dynamicClient, config)
 
 	for range time.Tick(time.Second * 10) {
 		gatherDataAndPublish(dataproviders, mqttClient, config)
