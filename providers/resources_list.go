@@ -113,7 +113,7 @@ func (rl *ResourcesList) updateResources() error {
 }
 
 func (rl *ResourcesList) addResource(resource map[string]interface{}) {
-	log.Info("Found resource ", resource)
+	log.Trace("Found resource ", resource)
 	namespace, name, _ := getNamespaceNameAndResourceVer(&resource)
 	// kind := resource["Kind"].(string)
 	if slices.Contains(rl.ignoredNamespaces, namespace) {
@@ -152,7 +152,10 @@ func removeFromResourcesSlice(s []*map[string]interface{}, i int) []*map[string]
 
 func getNamespaceNameAndResourceVer(resource *map[string]interface{}) (string, string, string) {
 	metadata := (*resource)["metadata"].(map[string]interface{})
-	namespace := metadata["namespace"].(string)
+	var namespace string 
+	if val, ok := metadata["namespace"]; ok {
+		namespace = val.(string)
+	}
 	name := metadata["name"].(string)
 	resourceVersion := metadata["resourceVersion"].(string)
 	return namespace, name, resourceVersion

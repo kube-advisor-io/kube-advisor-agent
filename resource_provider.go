@@ -15,6 +15,7 @@ type ResourceProvider interface {
 
 func getAllResourceProviders(dynamicClient *dynamic.DynamicClient, config config.Config) *[]ResourceProvider {
 	return &[]ResourceProvider{
+		providers.GetNodeResourceProvider(dynamicClient, config.IgnoredNamespaces),
 		providers.GetPodResourceProvider(dynamicClient, config.IgnoredNamespaces),
 		providers.GetDeploymentResourceProvider(dynamicClient, config.IgnoredNamespaces),
 	}

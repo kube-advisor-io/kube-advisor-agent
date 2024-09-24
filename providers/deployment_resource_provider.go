@@ -7,24 +7,24 @@ import (
 )
 
 type DeploymentResourceProvider struct {
-	resource        *schema.GroupVersionResource
-	podResourceList *ResourcesList
+	ResourceProviderBase
 }
 
 func GetDeploymentResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *DeploymentResourceProvider {
 	resource := &schema.GroupVersionResource{Group: "apps", Resource: "deployments", Version: "v1"}
 	return &DeploymentResourceProvider{
-		resource: resource,
-		podResourceList: GetResourcesListInstance(
-			dynamicClient,
-			resource,
-			ignoredNamespaces,
-		),
+		ResourceProviderBase: ResourceProviderBase{
+			Resource: resource,
+			ResourcesList: GetResourcesListInstance(
+				dynamicClient,
+				resource,
+				ignoredNamespaces,
+			)},
 	}
 }
 
 func (rp *DeploymentResourceProvider) GetResource() *schema.GroupVersionResource {
-	return rp.resource
+	return rp.Resource
 }
 
 func (prov *DeploymentResourceProvider) GetVersion() int32 {
@@ -33,7 +33,7 @@ func (prov *DeploymentResourceProvider) GetVersion() int32 {
 
 func (rp *DeploymentResourceProvider) GetParsedItems() []interface{} {
 	var result []interface{}
-	for _, deployment := range rp.podResourceList.Resources {
+	for _, deployment := range rp.ResourcesList.Resources {
 		var podParsed Deployment
 		mapstructure.Decode(deployment, &podParsed)
 		result = append(result, podParsed)
