@@ -1,7 +1,22 @@
 logLevel: trace6
 organizationID: 
 clusterID: 
-disabledProviders: []
+observedResources:
+  - group: ""
+    resource: pods
+    version: v1
+    filter:
+      metadata:
+        name: true
+        namespace: true
+        resourceVersion: true
+        labels: true
+        annotations: true
+      ownerReferences: true
+      spec:
+        containers: 
+          resources: true
+
 ignoredNamespaces: 
   - kube-system
   - kube-node-lease

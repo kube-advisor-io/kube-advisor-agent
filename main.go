@@ -16,7 +16,7 @@ import (
 
 func main() {
 	config := config.ReadConfig()
-	logLevel, err :=  log.ParseLevel(config.LogLevel)
+	logLevel, err := log.ParseLevel(config.LogLevel)
 	if err != nil {
 		logLevel = log.InfoLevel
 	}
@@ -24,29 +24,45 @@ func main() {
 
 	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseConfig(config.MQTT))
 	kubeConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-	clientset, _ := kubernetes.NewForConfig(kubeConfig)
-	dynamicClient, _ := dynamic.NewForConfig(kubeConfig)
-	dataproviders := getAllDataProviders(clientset, dynamicClient, config)
-
+	staticClient, err := kubernetes.NewForConfig(kubeConfig)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	dataProviders := getAllDataProviders(staticClient, config)
+	resourceProviders := getAllResourceProviders(dynamicClient, config)
 	for range time.Tick(time.Second * 10) {
-		gatherDataAndPublish(dataproviders, mqttClient, config)
+		gatherDataAndPublish(dataProviders, resourceProviders, mqttClient, config)
 	}
 
 	waitIndefinitely()
 }
 
-func gatherDataAndPublish(dataproviders *[]DataProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
+func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
 	messageData := make(map[string]interface{})
 	messageData["id"] = config.OrganizationID + "_" + config.ClusterID
 	messageData["version"] = 2 // schema version
 	messageData["organizationID"] = config.OrganizationID
 	messageData["clusterID"] = config.ClusterID
-	
+
 	data := make(map[string]interface{})
-	for _, dataprovider := range *dataproviders {
-		providerData := dataprovider.GetData()
-		providerData["version"] = dataprovider.GetVersion()
-		data[dataprovider.GetName()] = providerData
+
+	for _, dataProvider := range *dataProviders {
+		providerData := dataProvider.GetData()
+		providerData["version"] = dataProvider.GetVersion()
+		data[dataProvider.GetName()] = providerData
+	}
+	for _, resourceProvider := range *resourceProviders {
+		parsedItems := resourceProvider.GetParsedItems()
+		result := map[string]interface{}{}
+		result["version"] = resourceProvider.GetVersion()
+		result["items"] = parsedItems
+		data[resourceProvider.GetResource().Resource] = result
 	}
 	messageData["data"] = data
 	jsonString, _ := json.Marshal(messageData)

@@ -1,9 +1,10 @@
-package dataproviders
+package providers
 
 import (
+	"time"
+
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes"
-	"time"
 )
 
 type K8sVersionProvider struct {

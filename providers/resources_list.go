@@ -1,4 +1,4 @@
-package dataproviders
+package providers
 
 import (
 	"context"
@@ -16,25 +16,34 @@ import (
 )
 
 var (
-	resourcesListLock     = &sync.Mutex{}
-	resourcesListInstance *ResourcesList
+	resourcesListLock                                                      = &sync.Mutex{}
+	resourcesListInstances map[*schema.GroupVersionResource]*ResourcesList = map[*schema.GroupVersionResource]*ResourcesList{}
+	listTimeout                                                            = int64(60)
 )
 
 type ResourcesList struct {
-	ResourceList
-	dynamicClient *dynamic.DynamicClient
-	Resources []*map[string]interface{}
+	ignoredNamespaces     []string
+	latestResourceVersion string
+	dynamicClient         *dynamic.DynamicClient
+	resource              *schema.GroupVersionResource
+	Resources             []*map[string]interface{}
 }
 
-func GetResourcesListInstance(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourcesList {
-	if resourcesListInstance == nil {
+// schema.GroupVersionResource{Group: "", Resource: "pods", Version: "v1"}
+func GetResourcesListInstance(
+	dynamicClient *dynamic.DynamicClient,
+	resource *schema.GroupVersionResource,
+	ignoredNamespaces []string,
+) *ResourcesList {
+	if resourcesListInstances[resource] == nil {
 		resourcesListLock.Lock()
 		defer resourcesListLock.Unlock()
-		if resourcesListInstance == nil {
-			resourcesListInstance = new(ResourcesList)
-			resourcesListInstance.dynamicClient = dynamicClient
-			resourcesListInstance.ignoredNamespaces = ignoredNamespaces
-			resourcesListInstance.startWatching()
+		if resourcesListInstances[resource] == nil {
+			resourcesListInstances[resource] = new(ResourcesList)
+			resourcesListInstances[resource].dynamicClient = dynamicClient
+			resourcesListInstances[resource].ignoredNamespaces = ignoredNamespaces
+			resourcesListInstances[resource].resource = resource
+			resourcesListInstances[resource].startWatching()
 		} else {
 			log.Trace("Single instance already created.")
 		}
@@ -42,7 +51,7 @@ func GetResourcesListInstance(dynamicClient *dynamic.DynamicClient, ignoredNames
 		log.Trace("Single instance already created.")
 	}
 
-	return resourcesListInstance
+	return resourcesListInstances[resource]
 }
 
 func (rl *ResourcesList) startWatching() {
@@ -58,7 +67,7 @@ func (rl *ResourcesList) watchResources() {
 	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
 		timeOut := int64(60)
 		log.Info("Starting watching resources...")
-		return rl.dynamicClient.Resource(schema.GroupVersionResource{Group: "", Resource: "pods", Version: "v1"}).Watch(context.Background(), metav1.ListOptions{
+		return rl.dynamicClient.Resource(*rl.resource).Watch(context.Background(), metav1.ListOptions{
 			TimeoutSeconds:  &timeOut,
 			ResourceVersion: rl.latestResourceVersion,
 		})
@@ -90,7 +99,7 @@ func (rl *ResourcesList) watchResources() {
 }
 
 func (rl *ResourcesList) updateResources() error {
-	resources, err := rl.dynamicClient.Resource(schema.GroupVersionResource{Group: "", Resource: "pods", Version: "v1"}).List(context.Background(), metav1.ListOptions{TimeoutSeconds: &listTimeout})
+	resources, err := rl.dynamicClient.Resource(*rl.resource).List(context.Background(), metav1.ListOptions{TimeoutSeconds: &listTimeout})
 	if err != nil {
 		return err
 	}
@@ -107,14 +116,10 @@ func (rl *ResourcesList) addResource(resource map[string]interface{}) {
 	log.Info("Found resource ", resource)
 	namespace, name, _ := getNamespaceNameAndResourceVer(&resource)
 	// kind := resource["Kind"].(string)
-	if slices.Contains(rl.ignoredNamespaces, namespace){
-		log.Trace("Ignoring the resource", name, ", since it is in the ignored namespace " + namespace)
+	if slices.Contains(rl.ignoredNamespaces, namespace) {
+		log.Trace("Ignoring the resource", name, ", since it is in the ignored namespace "+namespace)
 		return
 	}
-	// var owner string
-	// if len(resource["Namespace"].(map[string]interface{})) != 0 {
-	// 	owner = resource.OwnerReferences[0].Kind
-	// }
 	rl.Resources = append(rl.Resources, &resource)
 }
 
@@ -131,8 +136,8 @@ func (rl *ResourcesList) deleteResource(name, namespace string) {
 func (rl *ResourcesList) updateResource(newResource *map[string]interface{}) {
 	newResourceNamespace, newResourceName, _ := getNamespaceNameAndResourceVer(newResource)
 	for index, existingResource := range rl.Resources {
-	    existingResourceNamespace, exisitingResourceName, _ := getNamespaceNameAndResourceVer(existingResource)
-		if exisitingResourceName == newResourceName&& existingResourceNamespace == newResourceNamespace {
+		existingResourceNamespace, exisitingResourceName, _ := getNamespaceNameAndResourceVer(existingResource)
+		if exisitingResourceName == newResourceName && existingResourceNamespace == newResourceNamespace {
 			rl.Resources[index] = newResource
 			break
 		}
@@ -145,7 +150,7 @@ func removeFromResourcesSlice(s []*map[string]interface{}, i int) []*map[string]
 	return s[:len(s)-1]
 }
 
-func getNamespaceNameAndResourceVer(resource *map[string]interface{}) (string, string, string){
+func getNamespaceNameAndResourceVer(resource *map[string]interface{}) (string, string, string) {
 	metadata := (*resource)["metadata"].(map[string]interface{})
 	namespace := metadata["namespace"].(string)
 	name := metadata["name"].(string)
