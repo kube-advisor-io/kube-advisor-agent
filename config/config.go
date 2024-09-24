@@ -15,14 +15,14 @@ type MQTTConfig struct {
 	CACertificate      string `yaml:"caCertificate"`
 	Username           string `yaml:"username"`
 	Password           string `yaml:"password"`
-	ClientID		   string `yaml:"clientID"`
+	ClientID           string `yaml:"clientID"`
 	CleanSession       bool   `yaml:"cleanSession"`
 }
 
 type Config struct {
 	LogLevel          string     `yaml:"logLevel"`
-	ClusterID         string     `yaml:"clusterID"`
-	OrganizationID    string     `yaml:"organizationID"`
+	ClusterId         string     `yaml:"clusterId"`
+	OrganizationId    string     `yaml:"organizationId"`
 	DisabledProviders []string   `yaml:"disabledProviders"`
 	IgnoredNamespaces []string   `yaml:"ignoredNamespaces"`
 	MQTT              MQTTConfig `yaml:"mqtt"`

@@ -45,10 +45,10 @@ func main() {
 
 func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
 	messageData := make(map[string]interface{})
-	messageData["id"] = config.OrganizationID + "_" + config.ClusterID
+	messageData["id"] = config.OrganizationId + "_" + config.ClusterId
 	messageData["version"] = 2 // schema version
-	messageData["organizationID"] = config.OrganizationID
-	messageData["clusterID"] = config.ClusterID
+	messageData["organizationId"] = config.OrganizationId
+	messageData["clusterId"] = config.ClusterId
 
 	data := make(map[string]interface{})
 

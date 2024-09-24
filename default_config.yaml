@@ -1,6 +1,6 @@
 logLevel: info
-organizationID: 
-clusterID: 
+organizationId: 
+clusterId: 
 observedResources:
   - group: ""
     resource: pods
@@ -23,7 +23,7 @@ ignoredNamespaces:
   - kube-public
 mqtt:
   broker: "tls://axeofcqtiseyl-ats.iot.eu-central-1.amazonaws.com:8883"
-  topic: "kubeadvisor/clusterdata/v1"
+  topic: "kubeadvisor/clusterdata/v2"
   qos: 1
   caCertificate: "/etc/certs/ca.pem"
   tlsKeyFile: "/etc/certs/private.key" # "path/to/tls/key"
