@@ -32,7 +32,7 @@ func (prov *PodResourceProvider) GetVersion() int32 {
 }
 
 func (rp *PodResourceProvider) GetParsedItems() []interface{} {
-	var result []interface{}
+	var result []interface{} = []interface{}{}
 	for _, pod := range rp.ResourcesList.Resources {
 		var podParsed Pod
 		mapstructure.Decode(pod, &podParsed)

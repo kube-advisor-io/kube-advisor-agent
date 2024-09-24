@@ -1,4 +1,4 @@
-logLevel: trace6
+logLevel: info
 organizationID: 
 clusterID: 
 observedResources:

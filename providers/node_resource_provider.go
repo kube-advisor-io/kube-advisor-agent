@@ -32,7 +32,7 @@ func (prov *NodeResourceProvider) GetVersion() int32 {
 }
 
 func (rp *NodeResourceProvider) GetParsedItems() []interface{} {
-	var result []interface{}
+	var result []interface{} = []interface{}{}
 	for _, node := range rp.ResourcesList.Resources {
 		var nodeParsed Node
 		mapstructure.Decode(node, &nodeParsed)

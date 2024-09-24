@@ -32,11 +32,11 @@ func (prov *DeploymentResourceProvider) GetVersion() int32 {
 }
 
 func (rp *DeploymentResourceProvider) GetParsedItems() []interface{} {
-	var result []interface{}
+	var result []interface{} = []interface{}{}
 	for _, deployment := range rp.ResourcesList.Resources {
-		var podParsed Deployment
-		mapstructure.Decode(deployment, &podParsed)
-		result = append(result, podParsed)
+		var deploymentParsed Deployment
+		mapstructure.Decode(deployment, &deploymentParsed)
+		result = append(result, deploymentParsed)
 	}
 	return result
 }
