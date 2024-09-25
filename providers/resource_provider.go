@@ -1,19 +1,20 @@
 package providers
 
 import (
+	"github.com/bobthebuilderberlin/kube-advisor-agent/resources"
 	"github.com/go-viper/mapstructure/v2"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
 
-type ResourceProvider[T Resource] struct {
+type ResourceProvider[T resources.Resource] struct {
 	Version       int32
 	Resource      *schema.GroupVersionResource
 	ResourcesList *ResourcesList
 }
 
-func GetPodResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Pod] {
-	return getResourceProvider[Pod](
+func GetPodResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Pod] {
+	return getResourceProvider[resources.Pod](
 		&schema.GroupVersionResource{Group: "", Resource: "pods", Version: "v1"},
 		dynamicClient,
 		ignoredNamespaces,
@@ -21,8 +22,8 @@ func GetPodResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespa
 	)
 }
 
-func GetDeploymentResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Deployment] {
-	return getResourceProvider[Deployment](
+func GetDeploymentResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Deployment] {
+	return getResourceProvider[resources.Deployment](
 		&schema.GroupVersionResource{Group: "apps", Resource: "deployments", Version: "v1"},
 		dynamicClient,
 		ignoredNamespaces,
@@ -30,8 +31,8 @@ func GetDeploymentResourceProvider(dynamicClient *dynamic.DynamicClient, ignored
 	)
 }
 
-func GetStatefulsetResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Statefulset] {
-	return getResourceProvider[Statefulset](
+func GetStatefulsetResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Statefulset] {
+	return getResourceProvider[resources.Statefulset](
 		&schema.GroupVersionResource{Group: "apps", Resource: "statefulsets", Version: "v1"},
 		dynamicClient,
 		ignoredNamespaces,
@@ -39,16 +40,16 @@ func GetStatefulsetResourceProvider(dynamicClient *dynamic.DynamicClient, ignore
 	)
 }
 
-func GetNodeResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Node] {
-	return getResourceProvider[Node](
+func GetNodeResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Node] {
+	return getResourceProvider[resources.Node](
 		&schema.GroupVersionResource{Group: "", Resource: "nodes", Version: "v1"},
 		dynamicClient,
 		ignoredNamespaces,
 		1,
 	)
 }
-func GetNamespaceResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Namespace] {
-	return getResourceProvider[Namespace](
+func GetNamespaceResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Namespace] {
+	return getResourceProvider[resources.Namespace](
 		&schema.GroupVersionResource{Group: "", Resource: "namespaces", Version: "v1"},
 		dynamicClient,
 		ignoredNamespaces,
@@ -56,7 +57,7 @@ func GetNamespaceResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredN
 	)
 }
 
-func getResourceProvider[T Resource](resource *schema.GroupVersionResource, dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string, version int32) *ResourceProvider[T] {
+func getResourceProvider[T resources.Resource](resource *schema.GroupVersionResource, dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string, version int32) *ResourceProvider[T] {
 	return &ResourceProvider[T]{
 		Version:  version,
 		Resource: resource,

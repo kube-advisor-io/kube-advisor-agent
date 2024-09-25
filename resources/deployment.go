@@ -1,7 +1,7 @@
-package providers
+package resources
 
 type Deployment struct {
-	Metadata DeploymentMetadata `json:"metadata"` // `mapstructure:"user"`
+	Metadata DeploymentMetadata `json:"metadata"`
 	Spec     DeploymentSpec     `json:"spec"`
 }
 

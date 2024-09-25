@@ -160,9 +160,3 @@ func getNamespaceNameAndResourceVer(resource *map[string]interface{}) (string, s
 	resourceVersion := metadata["resourceVersion"].(string)
 	return namespace, name, resourceVersion
 }
-
-// func resourceFromDeployment(pod *appsv1.Deployment) *Resource {
-// 	resource := &Resource{TypeMeta: pod.TypeMeta, ObjectMeta: pod.ObjectMeta}
-// 	resource.Kind = "Deployment"
-// 	return resource
-// }

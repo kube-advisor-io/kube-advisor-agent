@@ -1,7 +1,7 @@
-package providers
+package resources
 
 type Pod struct {
-	Metadata PodMetadata `json:"metadata"` // `mapstructure:"user"`
+	Metadata PodMetadata `json:"metadata"`
 	Spec     PodSpec     `json:"spec"`
 }
 

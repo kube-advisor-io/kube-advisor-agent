@@ -1,7 +1,7 @@
-package providers
+package resources
 
 type Statefulset struct {
-	Metadata StatefulsetMetadata `json:"metadata"` // `mapstructure:"user"`
+	Metadata StatefulsetMetadata `json:"metadata"`
 	Spec     StatefulsetSpec     `json:"spec"`
 }
 

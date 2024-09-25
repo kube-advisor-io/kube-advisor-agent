@@ -1,10 +1,10 @@
-package providers
+package resources
 
-type Node struct {
-	Metadata NodeMetadata `json:"metadata"`
+type Namespace struct {
+	Metadata NamespaceMetadata `json:"metadata"`
 }
 
-type NodeMetadata struct {
+type NamespaceMetadata struct {
 	Name        string            `json:"name"`
 	Labels      map[string]string `json:"labels"`
 	Annotations map[string]string `json:"annotations"`

@@ -9,6 +9,7 @@ RUN go mod download
 
 COPY *.go ./
 COPY providers/ providers/
+COPY resources/ resources/
 COPY mqtt/ mqtt/
 COPY config/ config/
 
