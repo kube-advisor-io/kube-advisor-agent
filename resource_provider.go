@@ -15,10 +15,10 @@ type ResourceProvider interface {
 
 func getAllResourceProviders(dynamicClient *dynamic.DynamicClient, config config.Config) *[]ResourceProvider {
 	return &[]ResourceProvider{
-		providers.GetNamespaceResourceProvider(dynamicClient, config.IgnoredNamespaces),
-		providers.GetNodeResourceProvider(dynamicClient, config.IgnoredNamespaces),
-		providers.GetPodResourceProvider(dynamicClient, config.IgnoredNamespaces),
-		providers.GetDeploymentResourceProvider(dynamicClient, config.IgnoredNamespaces),
-		providers.GetStatefulsetResourceProvider(dynamicClient, config.IgnoredNamespaces),
+		providers.GetNamespaceResourceProvider2(dynamicClient, config.IgnoredNamespaces),
+		providers.GetNodeResourceProvider2(dynamicClient, config.IgnoredNamespaces),
+		providers.GetPodResourceProvider2(dynamicClient, config.IgnoredNamespaces),
+		providers.GetDeploymentResourceProvider2(dynamicClient, config.IgnoredNamespaces),
+		providers.GetStatefulsetResourceProvider2(dynamicClient, config.IgnoredNamespaces),
 	}
 }

@@ -6,10 +6,10 @@ type Deployment struct {
 }
 
 type DeploymentMetadata struct {
-	Name            string                             `json:"name"`
-	Namespace       string                             `json:"namespace"`
-	Labels          map[string]string                  `json:"labels"`
-	Annotations     map[string]string                  `json:"annotations"`
+	Name        string            `json:"name"`
+	Namespace   string            `json:"namespace"`
+	Labels      map[string]string `json:"labels"`
+	Annotations map[string]string `json:"annotations"`
 }
 
 type DeploymentSpec struct {

@@ -152,7 +152,7 @@ func removeFromResourcesSlice(s []*map[string]interface{}, i int) []*map[string]
 
 func getNamespaceNameAndResourceVer(resource *map[string]interface{}) (string, string, string) {
 	metadata := (*resource)["metadata"].(map[string]interface{})
-	var namespace string 
+	var namespace string
 	if val, ok := metadata["namespace"]; ok {
 		namespace = val.(string)
 	}
