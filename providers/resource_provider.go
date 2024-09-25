@@ -12,7 +12,7 @@ type ResourceProvider[T Resource] struct {
 	ResourcesList *ResourcesList
 }
 
-func GetPodResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Pod] {
+func GetPodResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Pod] {
 	return getResourceProvider[Pod](
 		&schema.GroupVersionResource{Group: "", Resource: "pods", Version: "v1"},
 		dynamicClient,
@@ -21,7 +21,7 @@ func GetPodResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNamesp
 	)
 }
 
-func GetDeploymentResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Deployment] {
+func GetDeploymentResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Deployment] {
 	return getResourceProvider[Deployment](
 		&schema.GroupVersionResource{Group: "apps", Resource: "deployments", Version: "v1"},
 		dynamicClient,
@@ -30,7 +30,7 @@ func GetDeploymentResourceProvider2(dynamicClient *dynamic.DynamicClient, ignore
 	)
 }
 
-func GetStatefulsetResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Statefulset] {
+func GetStatefulsetResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Statefulset] {
 	return getResourceProvider[Statefulset](
 		&schema.GroupVersionResource{Group: "apps", Resource: "statefulsets", Version: "v1"},
 		dynamicClient,
@@ -39,7 +39,7 @@ func GetStatefulsetResourceProvider2(dynamicClient *dynamic.DynamicClient, ignor
 	)
 }
 
-func GetNodeResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Node] {
+func GetNodeResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Node] {
 	return getResourceProvider[Node](
 		&schema.GroupVersionResource{Group: "", Resource: "nodes", Version: "v1"},
 		dynamicClient,
@@ -47,7 +47,7 @@ func GetNodeResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNames
 		1,
 	)
 }
-func GetNamespaceResourceProvider2(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Namespace] {
+func GetNamespaceResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[Namespace] {
 	return getResourceProvider[Namespace](
 		&schema.GroupVersionResource{Group: "", Resource: "namespaces", Version: "v1"},
 		dynamicClient,
