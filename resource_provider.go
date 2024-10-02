@@ -19,6 +19,8 @@ func getAllResourceProviders(dynamicClient *dynamic.DynamicClient, config config
 		providers.GetNodeResourceProvider(dynamicClient, config.IgnoredNamespaces),
 		providers.GetPodResourceProvider(dynamicClient, config.IgnoredNamespaces),
 		providers.GetDeploymentResourceProvider(dynamicClient, config.IgnoredNamespaces),
+		providers.GetServiceResourceProvider(dynamicClient, config.IgnoredNamespaces),
+		providers.GetIngressResourceProvider(dynamicClient, config.IgnoredNamespaces),
 		providers.GetStatefulsetResourceProvider(dynamicClient, config.IgnoredNamespaces),
 	}
 }

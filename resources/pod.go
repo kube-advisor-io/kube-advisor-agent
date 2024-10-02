@@ -20,22 +20,31 @@ type PodMetadataOwnerReference struct {
 }
 
 type PodSpec struct {
-	Containers []PodSpecContainers `json:"containers"`
-	NodeName   string              `json:"nodeName"`
+	Containers []PodSpecContainer `json:"containers"`
+	NodeName   string             `json:"nodeName"`
 }
 
-type PodSpecContainers struct {
-	Image     string                     `json:"image"`
-	Name      string                     `json:"name"`
-	Resources PodSpecContainersResources `json:"resources"`
+type PodSpecContainer struct {
+	Image           string                            `json:"image"`
+	Name            string                            `json:"name"`
+	SecurityContext *PodSpecContainersSecurityContext `json:"securityContext,omitempty"`
+	Resources       *PodSpecContainersResources       `json:"resources,omitempty"`
+	LivenessProbe   *map[string]interface{}           `json:"livenessProbe,omitempty"`
+	ReadinessProbe  *map[string]interface{}           `json:"readinessProbe,omitempty"`
+	StartupProbe    *map[string]interface{}           `json:"startupProbe,omitempty"`
 }
 
 type PodSpecContainersResources struct {
-	Limits   PodSpecContainersResourcesItem `json:"limits"`
-	Requests PodSpecContainersResourcesItem `json:"requests"`
+	Limits   PodSpecContainersResourcesItem `json:"limits,omitempty"`
+	Requests PodSpecContainersResourcesItem `json:"requests,omitempty"`
 }
 
 type PodSpecContainersResourcesItem struct {
-	Cpu    string `json:"cpu"`
-	Memory string `json:"memory"`
+	Cpu    string `json:"cpu,omitempty"`
+	Memory string `json:"memory,omitempty"`
+}
+
+type PodSpecContainersSecurityContext struct {
+	AllowPrivilegeEscalation bool                   `json:"allowPrivilegeEscalation"`
+	Capabilites              map[string]interface{} `json:"capabilities,omitempty"`
 }

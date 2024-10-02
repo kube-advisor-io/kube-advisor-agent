@@ -40,6 +40,24 @@ func GetStatefulsetResourceProvider(dynamicClient *dynamic.DynamicClient, ignore
 	)
 }
 
+func GetServiceResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Service] {
+	return getResourceProvider[resources.Service](
+		&schema.GroupVersionResource{Group: "", Resource: "services", Version: "v1"},
+		dynamicClient,
+		ignoredNamespaces,
+		1,
+	)
+}
+
+func GetIngressResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Ingress] {
+	return getResourceProvider[resources.Ingress](
+		&schema.GroupVersionResource{Group: "networking.k8s.io", Resource: "ingresses", Version: "v1"},
+		dynamicClient,
+		ignoredNamespaces,
+		1,
+	)
+}
+
 func GetNodeResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Node] {
 	return getResourceProvider[resources.Node](
 		&schema.GroupVersionResource{Group: "", Resource: "nodes", Version: "v1"},

@@ -1,5 +1,5 @@
 package resources
 
 type Resource interface {
-	Pod | Deployment | Statefulset | Namespace | Node
+	Pod | Deployment | Statefulset | Service | Ingress | Namespace | Node
 }

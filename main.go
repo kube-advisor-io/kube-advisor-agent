@@ -15,6 +15,30 @@ import (
 )
 
 func main() {
+// 	pod:= &map[string]interface{}{
+// 		"spec": map[string]interface{}{
+// 			"containers": []map[string]interface{}{
+// 				map[string]interface{}{
+// 					"name": "container1",
+// 					"securityContext": map[string]interface{}{
+// 						"allowPrivilegeEscalation": false,
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	podMarshalled, _ := json.Marshal(pod)
+// 	log.Info(string(podMarshalled))
+// 	var parsed resources.Pod
+// 	mapstructure.Decode(pod, &parsed)
+// 	podMarshalled, _ = json.Marshal(parsed)
+// 	log.Info(string(podMarshalled))
+// 	log.Info(pod)
+
+
+// }
+
+// 	return
 	config := config.ReadConfig()
 	logLevel, err := log.ParseLevel(config.LogLevel)
 	if err != nil {
