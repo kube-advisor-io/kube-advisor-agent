@@ -8,9 +8,9 @@ type Pod struct {
 type PodMetadata struct {
 	Name            string                      `json:"name"`
 	Namespace       string                      `json:"namespace"`
-	Labels          map[string]string           `json:"labels"`
-	Annotations     map[string]string           `json:"annotations"`
-	OwnerReferences []PodMetadataOwnerReference `json:"ownerReferences"`
+	Labels          map[string]string           `json:"labels,omitempty"`
+	Annotations     map[string]string           `json:"annotations,omitempty"`
+	OwnerReferences []PodMetadataOwnerReference `json:"ownerReferences,omitempty"`
 }
 
 type PodMetadataOwnerReference struct {

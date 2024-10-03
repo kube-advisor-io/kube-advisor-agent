@@ -6,6 +6,6 @@ type Namespace struct {
 
 type NamespaceMetadata struct {
 	Name        string            `json:"name"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }

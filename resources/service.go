@@ -1,25 +1,25 @@
 package resources
 
 type Service struct {
-	Metadata DeploymentMetadata `json:"metadata"`
-	Spec     DeploymentSpec     `json:"spec"`
+	Metadata ServiceMetadata `json:"metadata"`
+	Spec     ServiceSpec     `json:"spec"`
 }
 
 type ServiceMetadata struct {
 	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type ServiceSpec struct {
-	Selector map[string]string `json:"selector"`
-	Ports    []ServiceSpecPort `json:"ports"`
+	Selector map[string]string `json:"selector,omitempty"`
+	Ports    []ServiceSpecPort `json:"ports,omitempty"`
 }
 
 type ServiceSpecPort struct {
-	Name       string `json:"name"`
-	Port       int32  `json:"port"`
-	TargetPort int32  `json:"targetPort"`
-	Protocol   string `json:"protocol"`
+	Name       string `json:"name,omitempty"`
+	Port       int32  `json:"port,omitempty"`
+	TargetPort int32  `json:"targetPort,omitempty"`
+	Protocol   string `json:"protocol,omitempty"`
 }

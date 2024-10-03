@@ -27,11 +27,3 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 15
           failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: nginx-port
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
-          periodSeconds: 15
-          failureThreshold: 3

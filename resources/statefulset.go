@@ -8,14 +8,14 @@ type Statefulset struct {
 type StatefulsetMetadata struct {
 	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 type StatefulsetSpec struct {
 	Replicas int32                  `json:"replicas"`
-	Selector DeploymentSpecSelector `json:"selector"`
+	Selector DeploymentSpecSelector `json:"selector,omitempty"`
 }
 
 type StatefulsetSpecSelector struct {
-	MatchLabels map[string]string `json:"matchLabels"`
+	MatchLabels map[string]string `json:"matchLabels,omitempty"`
 }
