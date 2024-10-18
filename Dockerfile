@@ -13,7 +13,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY *.go ./
-COPY dataproviders/ dataproviders/
+COPY providers/ providers/
+COPY resources/ resources/
 COPY mqtt/ mqtt/
 COPY config/ config/
 

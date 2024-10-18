@@ -4,7 +4,7 @@ import (
 	"slices"
 
 	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
-	"github.com/bobthebuilderberlin/kube-advisor-agent/dataproviders"
+	"github.com/bobthebuilderberlin/kube-advisor-agent/providers"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -14,12 +14,10 @@ type DataProvider interface {
 }
 
 func getAllDataProviders(client *kubernetes.Clientset, config config.Config) *[]DataProvider {
+
 	dataProviders := &[]DataProvider{
-		dataproviders.NewApiVersionProvider(client),
-		dataproviders.NewNakedPodsProvider(client, config),
-		dataproviders.NewResourcelessPodsProvider(client, config),
-		dataproviders.NewLabellessResourcesProvider(client, config),
-		dataproviders.NewGeneralInfoProvider(client, config),
+		providers.NewApiVersionProvider(client),
+		// dataproviders.NewGeneralInfoProvider(client, config),
 	}
 	filteredDataProviders := []DataProvider{}
 	for _, dataProvider := range *dataProviders {

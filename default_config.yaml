@@ -1,14 +1,29 @@
-logLevel: trace
-organizationID: 
-clusterID: 
-disabledProviders: []
+logLevel: info
+organizationId: 
+clusterId: 
+observedResources:
+  - group: ""
+    resource: pods
+    version: v1
+    filter:
+      metadata:
+        name: true
+        namespace: true
+        resourceVersion: true
+        labels: true
+        annotations: true
+      ownerReferences: true
+      spec:
+        containers: 
+          resources: true
+
 ignoredNamespaces: 
   - kube-system
   - kube-node-lease
   - kube-public
 mqtt:
   broker: "tls://axeofcqtiseyl-ats.iot.eu-central-1.amazonaws.com:8883"
-  topic: "kubeadvisor/clusterdata/v1"
+  topic: "kubeadvisor/clusterdata/v2"
   qos: 1
   caCertificate: "/etc/certs/ca.pem"
   tlsKeyFile: "/etc/certs/private.key" # "path/to/tls/key"

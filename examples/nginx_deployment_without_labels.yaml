@@ -17,3 +17,13 @@ spec:
         image: nginx:1.14.2
         ports:
         - containerPort: 80
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: nginx-port
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 15
+          failureThreshold: 3
