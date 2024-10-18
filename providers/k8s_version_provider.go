@@ -20,7 +20,7 @@ func NewApiVersionProvider(client *kubernetes.Clientset) *K8sVersionProvider {
 }
 
 func (prov *K8sVersionProvider) GetName() string {
-	return "k8s_version_provider"
+	return "k8sVersionProvider"
 }
 
 func (prov *K8sVersionProvider) GetData() map[string]interface{} {
@@ -30,7 +30,7 @@ func (prov *K8sVersionProvider) GetData() map[string]interface{} {
 func (prov *K8sVersionProvider) startWatching() {
 	version, _ := prov.client.DiscoveryClient.ServerVersion()
 	prov.k8sVersion = version
-	for range time.Tick(time.Second * 30) {
+	for range time.Tick(time.Second * 120) {
 		version, _ := prov.client.DiscoveryClient.ServerVersion()
 		prov.k8sVersion = version
 	}

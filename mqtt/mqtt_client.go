@@ -1,14 +1,16 @@
 package mqtt
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/tls"
-	log "github.com/sirupsen/logrus"
+	"crypto/x509"
 	"fmt"
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
-	"crypto/x509"
 )
 
 type MQTTClient struct {
@@ -48,22 +50,22 @@ func ParseConfig(config config.MQTTConfig) *MQTTOptions {
 			fmt.Println(err.Error())
 		}
 		clientOpts.SetTLSConfig(&tls.Config{
-			RootCAs: certpool,
+			RootCAs:      certpool,
 			Certificates: []tls.Certificate{cert},
-			ClientAuth: tls.NoClientCert,
-			ClientCAs: nil,
+			ClientAuth:   tls.NoClientCert,
+			ClientCAs:    nil,
 		})
 	}
 	clientOpts.SetMaxReconnectInterval(1 * time.Second)
 	clientOpts.SetKeepAlive(30 * time.Second)
 	if config.Username != "" {
-		fmt.Println("Set username "+ config.Username)
+		fmt.Println("Set username " + config.Username)
 		clientOpts.SetUsername(config.Username)
 		clientOpts.SetPassword(config.Password)
 	}
 	if config.ClientID != "" {
 		clientOpts.SetClientID(config.ClientID)
-		log.Info("Set client id "+ config.ClientID)
+		log.Info("Set client id " + config.ClientID)
 	}
 	// opts.SetClientID(*id)
 
@@ -83,9 +85,15 @@ func StartNewMQTTClient(opts *MQTTOptions) *MQTTClient {
 }
 
 func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
-	log.Info(fmt.Sprintf("Trying to publish data %v ...", message))
+	log.Info("Trying to publish data ...")
 	if mqttClient.previousMessage == message {
 		log.Info("was already sent")
+		return
+	}
+
+	gzippedMessage, err := gzipMessage(message)
+	if err != nil {
+		log.Error("error gzipping message: ", err)
 		return
 	}
 
@@ -93,9 +101,28 @@ func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 		topic,
 		byte(mqttClient.qos),
 		false,
-		message,
+		gzippedMessage,
 	)
 	token.Wait()
+
+	if token.Error() != nil {
+		log.Error("error publishing message to MQTT Broker: ", token.Error())
+		return
+	}
+
 	mqttClient.previousMessage = message
-	log.Info("published ", len(message), " bytes.")
+	log.Info("Published message: ", message)
+	log.Info(fmt.Sprintf("Length: %v bytes, gzipped %v bytes.", len(message), len(gzippedMessage)))
+}
+
+func gzipMessage(message string) ([]byte, error) {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	if _, err := gz.Write([]byte(message)); err != nil {
+		return nil, err
+	}
+	if err := gz.Close(); err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
 }
