@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: business-api
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: business-api
+  labels:
+    "app.kubernetes.io/name": nginx
+    "app.kubernetes.io/instance": nginx-service
+    "app.kubernetes.io/version": "v0.1"
+spec:
+  selector:
+    app.kubernetes.io/name: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376

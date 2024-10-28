@@ -1,7 +1,18 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: business-api
+
+---
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: test-ingress
+  name: business-api-ingress
+  namespace: business-api
+  labels:
+    "app.kubernetes.io/name": business-api
+    "app.kubernetes.io/instance": business-api-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -13,6 +24,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: test
+            name: nginx-service
             port:
               number: 80

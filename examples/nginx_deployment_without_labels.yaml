@@ -1,9 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: business-api
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment2
+  name: nginx-deployment
+  namespace: business-api
 spec:
-  replicas: 20
+  replicas: 3
   selector:
     matchLabels:
       app: nginx
