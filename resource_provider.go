@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
+// emits a list of resources in addition to its version and resource type
 type ResourceProvider interface {
 	GetResource() *schema.GroupVersionResource
 	GetParsedItems() []interface{}

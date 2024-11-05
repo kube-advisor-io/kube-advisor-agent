@@ -15,15 +15,36 @@ import (
 )
 
 func main() {
-	config := config.ReadConfig()
+	config, err := config.ReadConfig()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	logLevel, err := log.ParseLevel(config.LogLevel)
 	if err != nil {
 		logLevel = log.InfoLevel
 	}
 	log.SetLevel(logLevel)
 
-	mqttClient := mqtt.StartNewMQTTClient(mqtt.ParseConfig(config.MQTT))
-	kubeConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	options, err := mqtt.ParseConfig(config.MQTT)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	mqttClient, err := mqtt.StartNewMQTTClient(options)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	staticClient, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
 		log.Error(err)
@@ -34,6 +55,7 @@ func main() {
 		log.Error(err)
 		return
 	}
+	
 	dataProviders := getAllDataProviders(staticClient, config)
 	resourceProviders := getAllResourceProviders(dynamicClient, config)
 	for range time.Tick(time.Second * 10) {
@@ -65,7 +87,12 @@ func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]Re
 	}
 	messageData["data"] = data
 
-	jsonString, _ := json.Marshal(messageData)
+	jsonString, err := json.Marshal(messageData)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	mqttClient.PublishMessage(config.MQTT.Topic, string(jsonString))
 }
 

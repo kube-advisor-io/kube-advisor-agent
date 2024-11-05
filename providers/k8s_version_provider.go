@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// Emits the used Kubernetes Version
 type K8sVersionProvider struct {
 	client     *kubernetes.Clientset
 	k8sVersion *version.Info

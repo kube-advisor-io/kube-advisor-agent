@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// An interface for generic data providers that are not based on resource lists. Example: K8sVersionProvider.
 type DataProvider interface {
 	GetName() string
 	GetData() map[string]interface{}

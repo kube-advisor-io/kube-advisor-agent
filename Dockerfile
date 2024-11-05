@@ -21,7 +21,7 @@ COPY config/ config/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /kube-advisor-agent
 
-
+# this image will only contain our kube-advisor-agent binary and its default config.
 FROM --platform=${TARGETPLATFORM:-linux/amd64} scratch
 
 COPY --from=base /kube-advisor-agent /kube-advisor-agent
