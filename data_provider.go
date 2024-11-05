@@ -18,7 +18,6 @@ func getAllDataProviders(client *kubernetes.Clientset, config config.Config) *[]
 
 	dataProviders := &[]DataProvider{
 		providers.NewApiVersionProvider(client),
-		// dataproviders.NewGeneralInfoProvider(client, config),
 	}
 	filteredDataProviders := []DataProvider{}
 	for _, dataProvider := range *dataProviders {

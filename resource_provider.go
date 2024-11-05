@@ -14,6 +14,7 @@ type ResourceProvider interface {
 	GetVersion() int32
 }
 
+// returns instances of all existing resource providers
 func getAllResourceProviders(dynamicClient *dynamic.DynamicClient, config config.Config) *[]ResourceProvider {
 	return &[]ResourceProvider{
 		providers.GetNamespaceResourceProvider(dynamicClient, config.IgnoredNamespaces),
