@@ -87,7 +87,7 @@ func StartNewMQTTClient(opts *MQTTOptions) (*MQTTClient, error) {
 func (mqttClient *MQTTClient) PublishMessage(topic string, message string) {
 	log.Info("Trying to publish data via MQTT ...")
 	if mqttClient.previousMessage == message {
-		log.Info("... was already sent")
+		log.Info("... but exact same data was already sent previously.")
 		return
 	}
 
