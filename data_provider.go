@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// An interface for generic data providers that are not based on resource lists. Example: K8sVersionProvider.
 type DataProvider interface {
 	GetName() string
 	GetData() map[string]interface{}
@@ -17,7 +18,6 @@ func getAllDataProviders(client *kubernetes.Clientset, config config.Config) *[]
 
 	dataProviders := &[]DataProvider{
 		providers.NewApiVersionProvider(client),
-		// dataproviders.NewGeneralInfoProvider(client, config),
 	}
 	filteredDataProviders := []DataProvider{}
 	for _, dataProvider := range *dataProviders {

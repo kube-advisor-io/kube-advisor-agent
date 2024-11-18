@@ -21,6 +21,7 @@ var (
 	listTimeout                                                            = int64(60)
 )
 
+// A generic list or K8s resources which is updated continously through watching that resource type on the K8s Api.
 type ResourcesList struct {
 	ignoredNamespaces     []string
 	latestResourceVersion string
@@ -29,7 +30,8 @@ type ResourcesList struct {
 	Resources             []*map[string]interface{}
 }
 
-// schema.GroupVersionResource{Group: "", Resource: "pods", Version: "v1"}
+// Only one instance per resource type should exist.
+// The per-resource singleton is returned here.
 func GetResourcesListInstance(
 	dynamicClient *dynamic.DynamicClient,
 	resource *schema.GroupVersionResource,

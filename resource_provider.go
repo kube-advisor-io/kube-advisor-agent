@@ -7,12 +7,14 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
+// emits a list of resources in addition to its version and resource type
 type ResourceProvider interface {
 	GetResource() *schema.GroupVersionResource
 	GetParsedItems() []interface{}
 	GetVersion() int32
 }
 
+// returns instances of all existing resource providers
 func getAllResourceProviders(dynamicClient *dynamic.DynamicClient, config config.Config) *[]ResourceProvider {
 	return &[]ResourceProvider{
 		providers.GetNamespaceResourceProvider(dynamicClient, config.IgnoredNamespaces),

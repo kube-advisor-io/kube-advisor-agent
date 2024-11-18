@@ -6,6 +6,7 @@ ignoredNamespaces:
   - kube-system
   - kube-node-lease
   - kube-public
+  
 mqtt:
   broker: "tls://axeofcqtiseyl-ats.iot.eu-central-1.amazonaws.com:8883"
   topic: "kubeadvisor/clusterdata/v3"

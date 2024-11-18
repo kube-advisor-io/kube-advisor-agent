@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
+// Emits a resource list with a list of elements T
 type ResourceProvider[T resources.Resource] struct {
 	Version       int32
 	Resource      *schema.GroupVersionResource

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: postgresql-client
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgresql-client
+  namespace: postgresql-client
+  labels:
+    app: postgresql-client
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"    
+spec:
+  securityContext:
+    runAsNonRoot: true
+    supplementalGroups: [ 10001] 
+    fsGroup: 10001    
+  containers:
+    - name: postgresql-client
+      image: andreswebs/postgresql-client
+      imagePullPolicy: Always
+      securityContext:
+        runAsUser: 1000      
+      stdin: true
+      tty: true
+      command: ["/bin/sh"]
