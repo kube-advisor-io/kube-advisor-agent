@@ -1,2 +1,6 @@
+![kube-advisor-logo](https://kube-advisor.io/kube-advisor-logo.png)
+
 # kube-advisor-agent
-The agent for kube-advisor.io
+The cluster agent for kube-advisor.io, written in go.
+
+
