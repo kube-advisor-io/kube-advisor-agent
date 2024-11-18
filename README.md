@@ -1,4 +1,4 @@
-![kube-advisor-logo](https://kube-advisor.io/kube-advisor-logo.png)
+![kube-advisor-logo](https://kube-advisor.io/android-chrome-512x512.png)
 
 # kube-advisor-agent
 The cluster agent for [kube-advisor.io](https://kube-advisor.io), written in go.
