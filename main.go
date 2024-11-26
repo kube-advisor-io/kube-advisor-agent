@@ -8,6 +8,7 @@ import (
 
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
+	"github.com/bobthebuilderberlin/kube-advisor-agent/providers"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -58,6 +59,11 @@ func main() {
 	
 	dataProviders := getAllDataProviders(staticClient, config)
 	resourceProviders := getAllResourceProviders(dynamicClient, config)
+	kyvernoProvider := providers.NewKyvernoPoliciesProvider(dynamicClient, kubeConfig, config)
+	clusterReport := kyvernoProvider.CheckPolicies()
+	reportJson,_ := json.Marshal(clusterReport)
+	log.Infof("Cluster report: %s", reportJson)
+	
 	for range time.Tick(time.Second * 10) {
 		gatherDataAndPublish(dataProviders, resourceProviders, mqttClient, config)
 	}

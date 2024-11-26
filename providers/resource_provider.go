@@ -5,6 +5,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
 )
 
 // Emits a resource list with a list of elements T
@@ -67,9 +68,19 @@ func GetNodeResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamesp
 		1,
 	)
 }
+
 func GetNamespaceResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[resources.Namespace] {
 	return getResourceProvider[resources.Namespace](
 		&schema.GroupVersionResource{Group: "", Resource: "namespaces", Version: "v1"},
+		dynamicClient,
+		ignoredNamespaces,
+		1,
+	)
+}
+
+func GetKyvernoResourceProvider(dynamicClient *dynamic.DynamicClient, ignoredNamespaces []string) *ResourceProvider[kyvernov1.ClusterPolicy] {
+	return getResourceProvider[kyvernov1.ClusterPolicy](
+		&schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"},
 		dynamicClient,
 		ignoredNamespaces,
 		1,
