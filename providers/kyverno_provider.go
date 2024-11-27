@@ -10,11 +10,11 @@ import (
 
 	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
+	policyreportv1alpha2 "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/processor"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/report"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/store"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/utils/common"
-	policyreportv1alpha2 "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
 
 	"github.com/kyverno/kyverno/pkg/clients/dclient"
 	engineapi "github.com/kyverno/kyverno/pkg/engine/api"
@@ -30,8 +30,8 @@ import (
 
 type KyvernoPoliciesProvider struct {
 	// kyvernoPoliciesResourceProvider *ResourceProvider[kyvernov1.ClusterPolicy]
-	dynamicClient                   *dynamic.DynamicClient
-	kubeConfig *restclient.Config
+	dynamicClient   *dynamic.DynamicClient
+	kubeConfig      *restclient.Config
 	clusterPolicies *ResourcesList
 	// policies *unstructured.UnstructuredList
 }
@@ -40,19 +40,12 @@ func NewKyvernoPoliciesProvider(dynamicClient *dynamic.DynamicClient, kubeConfig
 	provider := &KyvernoPoliciesProvider{}
 	provider.dynamicClient = dynamicClient
 	provider.kubeConfig = kubeConfig
-	// provider.kyvernoPoliciesResourceProvider = GetKyvernoResourceProvider(dynamicClient, config.IgnoredNamespaces)
 	provider.clusterPolicies = GetResourcesListInstance(
-		dynamicClient, 
-		&schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"}, 
+		dynamicClient,
+		&schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"},
 		config.IgnoredNamespaces,
 	)
-	// provider.policies, _ = dynamicClient.Resource(
-	// 	schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"}).
-	// 	List(context.Background(), metav1.ListOptions{TimeoutSeconds: &listTimeout})
-	// if err != nil{
-	// 	log.Error(err)
-	// }
-	// log.Infof("Found cluster policies: %v", provider.policies)
+
 	return provider
 }
 
