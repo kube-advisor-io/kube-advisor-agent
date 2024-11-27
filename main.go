@@ -9,10 +9,12 @@ import (
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/providers"
+	"github.com/go-logr/logr"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	controllerlog "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func main() {
@@ -27,6 +29,8 @@ func main() {
 		logLevel = log.InfoLevel
 	}
 	log.SetLevel(logLevel)
+
+	controllerlog.SetLogger(logr.Discard())
 
 	options, err := mqtt.ParseConfig(config.MQTT)
 	if err != nil {

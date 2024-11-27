@@ -64,7 +64,7 @@ func (kpp *KyvernoPoliciesProvider) CheckPolicies() []policyreportv1alpha2.Clust
 		outPolicy := &kyvernov1.ClusterPolicy{}
 		runtime.DefaultUnstructuredConverter.FromUnstructured(*policy, &outPolicy)
 		parsedPolicyJson, _ := json.Marshal(outPolicy)
-		log.Infof("parsed policy: %s", parsedPolicyJson)
+		log.Debugf("parsed policy: %s", parsedPolicyJson)
 
 		parsedPolicies = append(parsedPolicies, outPolicy)
 	}
