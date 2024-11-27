@@ -29,11 +29,9 @@ import (
 )
 
 type KyvernoPoliciesProvider struct {
-	// kyvernoPoliciesResourceProvider *ResourceProvider[kyvernov1.ClusterPolicy]
 	dynamicClient   *dynamic.DynamicClient
 	kubeConfig      *restclient.Config
 	clusterPolicies *ResourcesList
-	// policies *unstructured.UnstructuredList
 }
 
 func NewKyvernoPoliciesProvider(dynamicClient *dynamic.DynamicClient, kubeConfig *restclient.Config, config config.Config) *KyvernoPoliciesProvider {
