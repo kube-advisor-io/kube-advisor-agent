@@ -8,10 +8,13 @@ import (
 
 	config "github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	"github.com/bobthebuilderberlin/kube-advisor-agent/mqtt"
+	"github.com/bobthebuilderberlin/kube-advisor-agent/providers"
+	"github.com/go-logr/logr"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	controllerlog "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func main() {
@@ -26,6 +29,8 @@ func main() {
 		logLevel = log.InfoLevel
 	}
 	log.SetLevel(logLevel)
+
+	controllerlog.SetLogger(logr.Discard())
 
 	options, err := mqtt.ParseConfig(config.MQTT)
 	if err != nil {
@@ -55,17 +60,19 @@ func main() {
 		log.Error(err)
 		return
 	}
-	
+
 	dataProviders := getAllDataProviders(staticClient, config)
 	resourceProviders := getAllResourceProviders(dynamicClient, config)
-	for range time.Tick(time.Second * 10) {
-		gatherDataAndPublish(dataProviders, resourceProviders, mqttClient, config)
+	kyvernoProvider := providers.NewKyvernoPoliciesProvider(dynamicClient, kubeConfig, config)
+
+	for range time.Tick(time.Second * 30) {
+		gatherDataAndPublish(dataProviders, resourceProviders, kyvernoProvider, mqttClient, config)
 	}
 
 	waitIndefinitely()
 }
 
-func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
+func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, kyvernoProvider *providers.KyvernoPoliciesProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
 	messageData := make(map[string]interface{})
 	messageData["id"] = config.OrganizationId + "_" + config.ClusterId
 	messageData["version"] = 2 // schema version
@@ -85,6 +92,10 @@ func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]Re
 		result["items"] = parsedItems
 		data[resourceProvider.GetResource().Resource] = result
 	}
+
+	clusterReport := kyvernoProvider.CheckPolicies()
+	data["kyvernoClusterReports"] = clusterReport
+
 	messageData["data"] = data
 
 	jsonString, err := json.Marshal(messageData)
