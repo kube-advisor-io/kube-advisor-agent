@@ -10,7 +10,6 @@ import (
 
 	"github.com/bobthebuilderberlin/kube-advisor-agent/config"
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
-	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/commands/apply"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/processor"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/report"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/store"
@@ -20,7 +19,7 @@ import (
 	"github.com/kyverno/kyverno/pkg/clients/dclient"
 	engineapi "github.com/kyverno/kyverno/pkg/engine/api"
 	log "github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -29,15 +28,12 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-var (
-	cmd apply.ApplyCommandConfig
-)
-
 type KyvernoPoliciesProvider struct {
 	// kyvernoPoliciesResourceProvider *ResourceProvider[kyvernov1.ClusterPolicy]
 	dynamicClient                   *dynamic.DynamicClient
 	kubeConfig *restclient.Config
-	policies *unstructured.UnstructuredList
+	clusterPolicies *ResourcesList
+	// policies *unstructured.UnstructuredList
 }
 
 func NewKyvernoPoliciesProvider(dynamicClient *dynamic.DynamicClient, kubeConfig *restclient.Config, config config.Config) *KyvernoPoliciesProvider {
@@ -45,23 +41,28 @@ func NewKyvernoPoliciesProvider(dynamicClient *dynamic.DynamicClient, kubeConfig
 	provider.dynamicClient = dynamicClient
 	provider.kubeConfig = kubeConfig
 	// provider.kyvernoPoliciesResourceProvider = GetKyvernoResourceProvider(dynamicClient, config.IgnoredNamespaces)
-	provider.policies, _ = dynamicClient.Resource(
-		schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"}).
-		List(context.Background(), metav1.ListOptions{TimeoutSeconds: &listTimeout})
+	provider.clusterPolicies = GetResourcesListInstance(
+		dynamicClient, 
+		&schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"}, 
+		config.IgnoredNamespaces,
+	)
+	// provider.policies, _ = dynamicClient.Resource(
+	// 	schema.GroupVersionResource{Group: "kyverno.io", Resource: "clusterpolicies", Version: "v1"}).
+	// 	List(context.Background(), metav1.ListOptions{TimeoutSeconds: &listTimeout})
 	// if err != nil{
 	// 	log.Error(err)
 	// }
-	log.Infof("Found cluster policies: %v", provider.policies)
+	// log.Infof("Found cluster policies: %v", provider.policies)
 	return provider
 }
 
 func (kpp *KyvernoPoliciesProvider) CheckPolicies() []policyreportv1alpha2.ClusterPolicyReport {
 	parsedPolicies := []kyvernov1.PolicyInterface{}
-	for _, policy := range kpp.policies.Items {
+	for _, policy := range kpp.clusterPolicies.Resources {
 		originalPolicyJson, _ := json.Marshal(policy)
-		log.Infof("original policy: %s", originalPolicyJson)
+		log.Debugf("original policy: %s", originalPolicyJson)
 		outPolicy := &kyvernov1.ClusterPolicy{}
-		runtime.DefaultUnstructuredConverter.FromUnstructured(policy.Object, &outPolicy)
+		runtime.DefaultUnstructuredConverter.FromUnstructured(*policy, &outPolicy)
 		parsedPolicyJson, _ := json.Marshal(outPolicy)
 		log.Infof("parsed policy: %s", parsedPolicyJson)
 
@@ -72,13 +73,13 @@ func (kpp *KyvernoPoliciesProvider) CheckPolicies() []policyreportv1alpha2.Clust
 	if err != nil {
 		log.Error(err)
 	}
-	log.Infof("dClient: %v", dClient)
+	log.Debugf("dClient: %v", dClient)
 
 	resources, err := kpp.loadResources(os.Stdout, parsedPolicies, dClient)
 	if err != nil {
 		log.Error(err)
 	}
-	log.Infof("Resources: %v", resources)
+	log.Debugf("Resources: %v", resources)
 
 	var store store.Store
 	store.SetLocal(true)
@@ -107,7 +108,7 @@ func (kpp *KyvernoPoliciesProvider) CheckPolicies() []policyreportv1alpha2.Clust
 			Out:                  os.Stdout,
 		}
 		ers, err := processor.ApplyPoliciesOnResource()
-		log.Infof("Engine response: %v", ers)
+		log.Debugf("Engine response: %v", ers)
 		if err != nil {
 			log.Errorf("Error while applying policies %v", err)
 		}

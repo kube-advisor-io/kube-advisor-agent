@@ -56,22 +56,19 @@ func main() {
 		log.Error(err)
 		return
 	}
-	
+
 	dataProviders := getAllDataProviders(staticClient, config)
 	resourceProviders := getAllResourceProviders(dynamicClient, config)
 	kyvernoProvider := providers.NewKyvernoPoliciesProvider(dynamicClient, kubeConfig, config)
-	clusterReport := kyvernoProvider.CheckPolicies()
-	reportJson,_ := json.Marshal(clusterReport)
-	log.Infof("Cluster report: %s", reportJson)
-	
-	for range time.Tick(time.Second * 10) {
-		gatherDataAndPublish(dataProviders, resourceProviders, mqttClient, config)
+
+	for range time.Tick(time.Second * 30) {
+		gatherDataAndPublish(dataProviders, resourceProviders, kyvernoProvider, mqttClient, config)
 	}
 
 	waitIndefinitely()
 }
 
-func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
+func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, kyvernoProvider *providers.KyvernoPoliciesProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
 	messageData := make(map[string]interface{})
 	messageData["id"] = config.OrganizationId + "_" + config.ClusterId
 	messageData["version"] = 2 // schema version
@@ -91,6 +88,10 @@ func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]Re
 		result["items"] = parsedItems
 		data[resourceProvider.GetResource().Resource] = result
 	}
+
+	clusterReport := kyvernoProvider.CheckPolicies()
+	data["kyvernoClusterReports"] = clusterReport
+
 	messageData["data"] = data
 
 	jsonString, err := json.Marshal(messageData)
