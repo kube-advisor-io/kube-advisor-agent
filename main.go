@@ -65,6 +65,7 @@ func main() {
 	resourceProviders := getAllResourceProviders(dynamicClient, config)
 	kyvernoProvider := providers.NewKyvernoPoliciesProvider(dynamicClient, kubeConfig, config)
 
+	gatherDataAndPublish(dataProviders, resourceProviders, kyvernoProvider, mqttClient, config)
 	for range time.Tick(time.Second * 30) {
 		gatherDataAndPublish(dataProviders, resourceProviders, kyvernoProvider, mqttClient, config)
 	}
@@ -72,7 +73,13 @@ func main() {
 	waitIndefinitely()
 }
 
-func gatherDataAndPublish(dataProviders *[]DataProvider, resourceProviders *[]ResourceProvider, kyvernoProvider *providers.KyvernoPoliciesProvider, mqttClient *mqtt.MQTTClient, config config.Config) {
+func gatherDataAndPublish(
+	dataProviders *[]DataProvider,
+	resourceProviders *[]ResourceProvider,
+	kyvernoProvider *providers.KyvernoPoliciesProvider,
+	mqttClient *mqtt.MQTTClient,
+	config config.Config,
+) {
 	messageData := make(map[string]interface{})
 	messageData["id"] = config.OrganizationId + "_" + config.ClusterId
 	messageData["version"] = 2 // schema version
