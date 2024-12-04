@@ -21,9 +21,9 @@ spec:
       stdin: true
       tty: true
       command: ["/bin/sh"]
-      volumeMounts:
-        - name: config-vol
-          mountPath: /etc/config
+      # volumeMounts:
+      #   - name: config-vol
+      #     mountPath: /etc/config
   volumes:
     - name: config-vol
       configMap:
