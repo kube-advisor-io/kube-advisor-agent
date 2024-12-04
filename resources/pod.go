@@ -9,7 +9,6 @@ type PodMetadata struct {
 	Name            string                      `json:"name"`
 	Namespace       string                      `json:"namespace"`
 	Labels          map[string]string           `json:"labels,omitempty"`
-	// Annotations     map[string]string           `json:"annotations,omitempty"` // for the moment we do not need annoations
 	OwnerReferences []PodMetadataOwnerReference `json:"ownerReferences,omitempty"`
 }
 
@@ -22,6 +21,7 @@ type PodMetadataOwnerReference struct {
 type PodSpec struct {
 	Containers []PodSpecContainer `json:"containers"`
 	NodeName   string             `json:"nodeName"`
+	Volumes    []PodSpecVolume    `json:"volumes,omitempty"`
 }
 
 type PodSpecContainer struct {
@@ -32,6 +32,7 @@ type PodSpecContainer struct {
 	LivenessProbe   *map[string]interface{}           `json:"livenessProbe,omitempty"`
 	ReadinessProbe  *map[string]interface{}           `json:"readinessProbe,omitempty"`
 	StartupProbe    *map[string]interface{}           `json:"startupProbe,omitempty"`
+	VolumeMounts    []PodSpecContainerVolumeMount     `json:"volumeMounts,omitempty"`
 }
 
 type PodSpecContainersResources struct {
@@ -47,4 +48,12 @@ type PodSpecContainersResourcesItem struct {
 type PodSpecContainersSecurityContext struct {
 	AllowPrivilegeEscalation bool                   `json:"allowPrivilegeEscalation"`
 	Capabilites              map[string]interface{} `json:"capabilities,omitempty"`
+}
+
+type PodSpecContainerVolumeMount struct {
+	Name string `json:"name,omitempty"`
+}
+
+type PodSpecVolume struct {
+	Name string `json:"name,omitempty"`
 }
