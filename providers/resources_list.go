@@ -68,7 +68,7 @@ func (rl *ResourcesList) startWatching() {
 func (rl *ResourcesList) watchResources() {
 	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
 		timeOut := int64(60)
-		log.Info("Starting watching resources...")
+		log.Trace("Starting watching resources...")
 		return rl.dynamicClient.Resource(*rl.resource).Watch(context.Background(), metav1.ListOptions{
 			TimeoutSeconds:  &timeOut,
 			ResourceVersion: rl.latestResourceVersion,
